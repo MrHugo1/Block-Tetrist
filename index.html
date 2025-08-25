@@ -223,60 +223,46 @@
     letter-spacing: 1px;
   }
   
-  /* Game Over Overlay */
-  .game-over-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(10px);
-  }
-  
-  .game-over-content {
-    background: linear-gradient(145deg, #161a30, #1a1f3a);
-    border: 2px solid #f7768e;
-    border-radius: 20px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    max-width: 400px;
-  }
-  
-  .game-over-title {
-    font-size: 32px;
-    font-weight: bold;
-    color: #f7768e;
-    margin-bottom: 20px;
-  }
-  
-  .game-over-stats {
-    margin: 20px 0;
-    font-size: 18px;
-  }
-  
-  .game-over-button {
-    background: linear-gradient(145deg, #5de4c7, #4a5386);
-    color: #0f1220;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 16px 32px;
-    border-radius: 16px;
-    margin-top: 20px;
-    transition: all 0.3s ease;
-  }
-  
-  .game-over-button:hover {
-    background: linear-gradient(145deg, #4a5386, #5de4c7);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(93, 228, 199, 0.3);
-  }
+     /* Game Over Text Overlay */
+   .game-over-text {
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background: linear-gradient(145deg, #161a30, #1a1f3a);
+     border: 2px solid #f7768e;
+     border-radius: 16px;
+     padding: 20px;
+     text-align: center;
+     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+     z-index: 1000;
+     min-width: 200px;
+   }
+   
+   .game-over-title {
+     font-size: 18px;
+     font-weight: bold;
+     color: #f7768e;
+     margin-bottom: 12px;
+   }
+   
+   .game-over-button {
+     background: linear-gradient(145deg, #5de4c7, #4a5386);
+     color: #0f1220;
+     font-size: 14px;
+     font-weight: bold;
+     padding: 8px 16px;
+     border: none;
+     border-radius: 8px;
+     cursor: pointer;
+     transition: all 0.3s ease;
+   }
+   
+   .game-over-button:hover {
+     background: linear-gradient(145deg, #4a5386, #5de4c7);
+     transform: translateY(-1px);
+     box-shadow: 0 4px 12px rgba(93, 228, 199, 0.3);
+   }
   
   /* Combo Text Animation */
   .combo-text {
@@ -311,8 +297,8 @@
     .row { flex-direction: column; align-items: center; }
     .card { min-width: 280px; }
     .stats-display { flex-direction: column; align-items: center; }
-    .game-over-content { padding: 30px; max-width: 320px; }
-    .game-over-title { font-size: 24px; }
+         .game-over-text { padding: 16px; min-width: 160px; }
+     .game-over-title { font-size: 16px; }
   }
 </style>
 </head>
@@ -328,18 +314,11 @@
   
   <canvas id="game" width="720" height="900"></canvas>
   
-  <!-- Game Over Overlay -->
-  <div id="game-over-overlay" class="game-over-overlay" style="display: none;">
-    <div class="game-over-content">
-      <div class="game-over-title">Thua Rồi, Thử lại nhé!</div>
-      <div class="game-over-stats">
-        <p>Điểm: <span id="final-score">0</span></p>
-        <p>Lượt: <span id="final-turn">0</span></p>
-        <p>High Score: <span id="final-high-score">0</span></p>
-      </div>
-      <button class="game-over-button" onclick="resetGame()">Chơi Lại</button>
-    </div>
-  </div>
+     <!-- Game Over Text Overlay -->
+   <div id="game-over-overlay" class="game-over-text" style="display: none;">
+     <div class="game-over-title">Thua Rồi!</div>
+     <button class="game-over-button" onclick="resetGame()">Chơi Lại</button>
+   </div>
   
   <div class="stats-display">
     <div class="stat-item">
@@ -509,11 +488,34 @@
   }
   
   function checkGameOver() {
-    // Check if any piece can be placed
-    for(let i = 0; i < pool.length; i++) {
-      if(pool[i] && validPlacementsAny(pool[i])) return false;
+    // Check if there are any empty cells on the board
+    let hasEmptyCells = false;
+    for(let r = 0; r < BOARD_SIZE; r++) {
+      for(let c = 0; c < BOARD_SIZE; c++) {
+        if(!grid[r][c] && !isBlockedCell(r, c)) {
+          hasEmptyCells = true;
+          break;
+        }
+      }
+      if(hasEmptyCells) break;
     }
-    if(hold.piece && validPlacementsAny(hold.piece)) return false;
+    
+    // If no empty cells, game is over (victory condition)
+    if(!hasEmptyCells) return true;
+    
+    // Check if any piece in pool can be placed anywhere
+    for(let i = 0; i < pool.length; i++) {
+      if(pool[i] !== null) {
+        // If this piece can be placed anywhere, game continues
+        if(validPlacementsAny(pool[i])) return false;
+      }
+    }
+    
+    // If pool is empty, game is NOT over - just need to refill
+    if(pool.every(p => p === null)) return false;
+    
+    // If we reach here, pool has pieces but none can be placed
+    // Game over - player cannot place any remaining pieces
     return true;
   }
   
@@ -692,11 +694,19 @@
       }
     }
     
-    // Log refill info
-    console.log(`Refilled ${refilledCount} slots. Pool now has:`, pool.map(p => p ? p.id : 'null'));
-    console.log('Pool array:', pool);
-    console.log('Pool length:', pool.length);
-    console.log('Pool null count:', pool.filter(p => p === null).length);
+    // Double check - if any slot is still null, fill it
+    for(let i = 0; i < pool.length; i++) {
+      if(pool[i] === null) {
+        pool[i] = sampleOne(weights);
+        refilledCount++;
+      }
+    }
+    
+    // Log refill info (hidden)
+    // console.log(`Refilled ${refilledCount} slots. Pool now has:`, pool.map(p => p ? p.id : 'null'));
+    // console.log('Pool array:', pool);
+    // console.log('Pool length:', pool.length);
+    // console.log('Pool null count:', pool.filter(p => p === null).length);
     
     let placeable = pool.some(pc => pc && validPlacementsAny(pc));
 
@@ -798,27 +808,28 @@
             addComboText(comboText, centerX, centerY);
           }
 
-          // consume piece
-          pool[selected.index] = null;
-          selected.index=-1;
-          turn++;
-          if(swapCD>0) swapCD--;
-          if(hold.cd>0) hold.cd--;
+                     // consume piece
+           pool[selected.index] = null;
+           selected.index=-1;
+           turn++;
+           if(swapCD>0) swapCD--;
+           if(hold.cd>0) hold.cd--;
 
-          // Check for game over
-          if(checkGameOver()) {
-            gameOver = true;
-            render();
-            return;
-          }
-
-          // Auto refill if needed
-          if(pool.every(p => p === null)) {
-            refillPool();
-          } else {
-            render();
-          }
-          return;
+           // Render FIRST to show the placed piece
+           render();
+           
+           // THEN check for game over
+           if(checkGameOver()) {
+             gameOver = true;
+             render();
+             return;
+           }
+           
+                       // Auto refill pool if it's empty
+            if(pool.every(p => p === null)) {
+              refillPool();
+              return;
+            }
         }
       }
     }
@@ -949,10 +960,10 @@
     ctx.font = "bold 16px system-ui";
     ctx.fillText("POOL - Chọn khối để đặt", left, top - 20);
     
-    // Debug: Show pool state
-    ctx.fillStyle = "#f7768e";
-    ctx.font = "12px system-ui";
-    ctx.fillText(`Debug: Pool has ${pool.filter(p => p !== null).length}/3 pieces`, left, top - 5);
+    // Debug: Show pool state (hidden)
+    // ctx.fillStyle = "#f7768e";
+    // ctx.font = "12px system-ui";
+    // ctx.fillText(`Debug: Pool has ${pool.filter(p => p !== null).length}/3 pieces`, left, top - 5);
     
     ctx.font="bold 14px system-ui";
     for(let i=0;i<3;i++){
@@ -985,10 +996,10 @@
       ctx.fillStyle="#E8EBF7";
       ctx.fillText(`Slot ${i+1}`, x+6, y+16);
       
-      // Swap tip
+      // Swap tip - positioned above each slot
       ctx.fillStyle = swapCD>0? "#8b90a7" : "#a6da95";
       ctx.font = "12px system-ui";
-      ctx.fillText(`Swap: phím ${i+1} ${swapCD>0?`(CD ${swapCD})`:""}`, x+6, y=box-8);
+      ctx.fillText(`Swap: phím ${i+1} ${swapCD>0?`(CD ${swapCD})`:""}`, x+box/2-30, y-8);
     }
 
     // Hold panel - moved to better position
@@ -1024,10 +1035,10 @@
   function render(){
     ctx.clearRect(0,0,W,H);
     
-    // Debug: Log pool state before drawing
-    console.log('Render - Pool state:', pool);
-    console.log('Render - Pool length:', pool.length);
-    console.log('Render - Pool null count:', pool.filter(p => p === null).length);
+    // Debug: Log pool state before drawing (hidden)
+    // console.log('Render - Pool state:', pool);
+    // console.log('Render - Pool length:', pool.length);
+    // console.log('Render - Pool null count:', pool.filter(p => p === null).length);
     
     drawBoard();
     drawPool();
@@ -1037,22 +1048,20 @@
     let FR = getFillRate();
     let fairness = justDead? "Có lượt kẹt gần đây" : "Ổn";
     let ftxt = FR>0.7? "Căng" : (FR<0.3? "Rộng" : "Đẹp");
-    msg(
-      `<h3>📊 Thông Tin Game</h3>` +
-      `Turn <b>${turn}</b> • <span class="${FR<0.3?"ok":(FR>0.7?"bad":"warn")}">FR: ${(FR*100).toFixed(0)}% (${ftxt})</span>` +
-      ` • High Score: <span class="hl">${highScore}</span><br/>` +
-      `<span class="legend">Swap: phím 1/2/3 • Hold: phím H • Chuột phải: bỏ chọn</span>`
-    );
+         msg(
+       `<h3>📊 Thông Tin Game</h3>` +
+       `Turn <b>${turn}</b> • <span class="${FR<0.3?"ok":(FR>0.7?"bad":"warn")}">FR: ${(FR*100).toFixed(0)}% (${ftxt})</span>` +
+       ` • High Score: <span class="hl">${highScore}</span><br/>` +
+       `<span class="legend">Swap: phím 1/2/3 • Hold: phím H • Chuột phải: bỏ chọn</span>` +
+       `<br/><br/><button onclick="resetGame()" style="background: linear-gradient(145deg, #5de4c7, #4a5386); color: #0f1220; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">🔄 Chơi Lại</button>`
+     );
     
-    // Show game over overlay if game is over
-    if(gameOver) {
-      document.getElementById('final-score').textContent = score;
-      document.getElementById('final-turn').textContent = turn;
-      document.getElementById('final-high-score').textContent = highScore;
-      document.getElementById('game-over-overlay').style.display = 'flex';
-    } else {
-      document.getElementById('game-over-overlay').style.display = 'none';
-    }
+         // Show game over text if game is over
+     if(gameOver) {
+       document.getElementById('game-over-overlay').style.display = 'block';
+     } else {
+       document.getElementById('game-over-overlay').style.display = 'none';
+     }
   }
 
   // Boot
@@ -1060,28 +1069,13 @@
   
       // Ensure pool starts with 3 pieces
     pool = [null, null, null];
-    console.log("Initial pool:", pool);
     
     refillPool();
-    console.log("After refillPool:", pool);
     
     // Double check pool has 3 pieces
     if(pool.some(p => p === null)) {
-      console.log("Pool not properly filled, refilling...");
       refillPool();
-      console.log("After second refill:", pool);
     }
-    
-    // Final check and log
-    console.log("Final pool state:", pool);
-    console.log("Final pool length:", pool.length);
-    console.log("Final pool pieces:", pool.filter(p => p !== null).length);
-    
-    // Force render to show debug info
-    setTimeout(() => {
-      console.log("Delayed pool check:", pool);
-      render();
-    }, 100);
   
   render();
 })();

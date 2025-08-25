@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Block Tetrist - Game Đặt Khối Thông Minh</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { 
+    margin: 0; 
+    padding: 0; 
+    background: linear-gradient(135deg, #0f1220 0%, #1a1f3a 100%);
+    color: #E8EBF7; 
+    font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  
+  #wrap { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 16px; 
+    padding: 20px; 
+    min-height: 100vh;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(45deg, #5de4c7, #8093ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .header .subtitle {
+    margin: 8px 0 0;
+    font-size: 16px;
+    opacity: 0.8;
+    color: #a6da95;
+  }
+  
+  canvas { 
+    background: linear-gradient(145deg, #151a2d, #1c2342);
+    border: 2px solid #2a3156; 
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  canvas:hover {
+    border-color: #3a4376;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  
+  .row { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 16px; 
+    justify-content: center; 
+    align-items: flex-start; 
+    max-width: 1200px;
+  }
+  
+  .card { 
+    background: linear-gradient(145deg, #161a30, #1a1f3a);
+    border: 1px solid #2b335c; 
+    padding: 16px 20px; 
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    min-width: 300px;
+  }
+  
+  .card:hover {
+    border-color: #3a4376;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  
+  button { 
+    background: linear-gradient(145deg, #2a3156, #3a4376);
+    color: #E8EBF7; 
+    border: none;
+    border-radius: 12px; 
+    padding: 12px 20px; 
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  
+  button:hover:not([disabled]) {
+    background: linear-gradient(145deg, #3a4376, #4a5386);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  button[disabled] { 
+    opacity: 0.45; 
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .stat { 
+    margin: 4px 12px; 
+    font-size: 14px; 
+    opacity: 0.9; 
+  }
+  
+  .legend { 
+    font-size: 14px; 
+    opacity: 0.9; 
+    line-height: 1.6; 
+  }
+  
+  .hl { 
+    color: #5de4c7; 
+    font-weight: 600; 
+  }
+  
+  .warn { 
+    color: #f9c859; 
+  }
+  
+  .bad { 
+    color: #f7768e; 
+  }
+  
+  .ok { 
+    color: #a6da95; 
+  }
+  
+  .version { 
+    position: absolute; 
+    top: 20px; 
+    right: 20px; 
+    font-size: 12px; 
+    opacity: 0.6;
+    background: rgba(26, 26, 26, 0.8);
+    padding: 8px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+  }
+  
+  .debug { 
+    position: absolute; 
+    top: 60px; 
+    right: 20px; 
+    font-size: 11px; 
+    opacity: 0.8; 
+    background: rgba(26, 26, 26, 0.9); 
+    padding: 8px 12px; 
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    max-width: 200px;
+  }
+  
+  .controls-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  
+  .control-group {
+    background: rgba(43, 51, 92, 0.3);
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid #5de4c7;
+  }
+  
+  .control-group h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #5de4c7;
+  }
+  
+  .key {
+    background: #2a3156;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #5de4c7;
+  }
+  
+  .stats-display {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  
+  .stat-item {
+    background: rgba(43, 51, 92, 0.3);
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 120px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #5de4c7;
+    margin-bottom: 4px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  /* Game Over Overlay */
+  .game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+  }
+  
+  .game-over-content {
+    background: linear-gradient(145deg, #161a30, #1a1f3a);
+    border: 2px solid #f7768e;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    max-width: 400px;
+  }
+  
+  .game-over-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f7768e;
+    margin-bottom: 20px;
+  }
+  
+  .game-over-stats {
+    margin: 20px 0;
+    font-size: 18px;
+  }
+  
+  .game-over-button {
+    background: linear-gradient(145deg, #5de4c7, #4a5386);
+    color: #0f1220;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 16px 32px;
+    border-radius: 16px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .game-over-button:hover {
+    background: linear-gradient(145deg, #4a5386, #5de4c7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(93, 228, 199, 0.3);
+  }
+  
+  /* Combo Text Animation */
+  .combo-text {
+    position: absolute;
+    font-size: 48px;
+    font-weight: bold;
+    color: #5de4c7;
+    text-shadow: 0 0 20px rgba(93, 228, 199, 0.8);
+    pointer-events: none;
+    z-index: 100;
+    animation: comboFadeOut 2s ease-out forwards;
+  }
+  
+  @keyframes comboFadeOut {
+    0% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2) translateY(-20px);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.5) translateY(-40px);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    #wrap { padding: 16px; }
+    .header h1 { font-size: 24px; }
+    .row { flex-direction: column; align-items: center; }
+    .card { min-width: 280px; }
+    .stats-display { flex-direction: column; align-items: center; }
+    .game-over-content { padding: 30px; max-width: 320px; }
+    .game-over-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="version">v1.4.2</div>
+  <div class="debug" id="debug"></div>
+  
+  <div class="header">
+    <h1>Block Tetrist</h1>
+    <div class="subtitle">Game Đặt Khối Thông Minh - Bàn 8×8</div>
+  </div>
+  
+  <canvas id="game" width="720" height="900"></canvas>
+  
+  <!-- Game Over Overlay -->
+  <div id="game-over-overlay" class="game-over-overlay" style="display: none;">
+    <div class="game-over-content">
+      <div class="game-over-title">Thua Rồi, Thử lại nhé!</div>
+      <div class="game-over-stats">
+        <p>Điểm: <span id="final-score">0</span></p>
+        <p>Lượt: <span id="final-turn">0</span></p>
+        <p>High Score: <span id="final-high-score">0</span></p>
+      </div>
+      <button class="game-over-button" onclick="resetGame()">Chơi Lại</button>
+    </div>
+  </div>
+  
+  <div class="stats-display">
+    <div class="stat-item">
+      <div class="stat-value" id="score-display">0</div>
+      <div class="stat-label">Điểm</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="turn-display">0</div>
+      <div class="stat-label">Lượt</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="combo-display">1.0×</div>
+      <div class="stat-label">Combo</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="fr-display">0%</div>
+      <div class="stat-label">Fill Rate</div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="card legend">
+      <h3>🎮 Cách Chơi</h3>
+      <p><b>Chọn khối</b> từ pool bên dưới, sau đó <b>click lên ô</b> trên bàn để đặt. <span class="hl">Chuột phải</span> để bỏ chọn.</p>
+      <p><span class="hl">Hold (H)</span>: Lưu 1 khối (CD 3 lượt)</p>
+      <p><span class="hl">Swap (1/2/3)</span>: Đổi khối sang khối cứu nạn (CD 9 lượt)</p>
+      <p><span class="hl">Ô đỏ</span>: Ô bị khóa, chỉ clear được khi xếp đủ hàng/cột</p>
+    </div>
+    
+    <div class="card legend">
+      <h3>🏆 Hệ Thống Điểm</h3>
+      <p><b>Chain</b>: Clear liên tiếp tăng multiplier (≤1.5×)</p>
+      <p><b>Precision</b>: Clear ≥2 line nhân điểm (1.2× / 1.5×)</p>
+      <p><b>Combo</b>: Tích lũy theo thời gian</p>
+      <p><b>Xoay khối</b>: 32 loại khối với 4 hướng xoay khác nhau</p>
+    </div>
+    
+    <div class="card legend" id="msg"></div>
+  </div>
+  
+  <div class="controls-info">
+    <div class="control-group">
+      <h3>⌨️ Điều Khiển</h3>
+      <p><span class="key">H</span> - Hold khối đang chọn</p>
+      <p><span class="key">1</span> - Swap khối slot 1</p>
+      <p><span class="key">2</span> - Swap khối slot 2</p>
+      <p><span class="key">3</span> - Swap khối slot 3</p>
+      <p><span class="key">Chuột phải</span> - Bỏ chọn</p>
+    </div>
+    
+    <div class="control-group">
+      <h3>🎯 Mục Tiêu</h3>
+      <p>Đặt khối để tạo thành hàng/cột hoàn chỉnh</p>
+      <p>Clear càng nhiều line càng tốt</p>
+      <p>Duy trì combo để tăng điểm</p>
+      <p>Quản lý Fill Rate thông minh</p>
+      <p>Clear các ô bị khóa (màu đỏ) để tăng điểm</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const W = 720, H = 900;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // Layout
+  const BOARD_SIZE = 8;
+  const CELL = 60; // cell px
+  const BOARD_X = (W - CELL*BOARD_SIZE)/2; // center
+  const BOARD_Y = 40;
+  const POOL_Y = 620;
+
+  // Tuning
+  const scoring = {
+    cell: 1,
+    line: 10,
+    precisionTwo: 1.2,
+    precisionThree: 1.5,
+    comboSteps: [1.0, 1.1, 1.3, 1.5],
+    comboCap: 1.5
+  };
+  const holdCfg = { cdTurns: 3 };
+  const swapCfg = { cdTurns: 9, rescueSet: ["1x2","1x2_90","1x3","1x3_90","I3","I3_90","L3","L3_90","L3_180","L3_270"] };
+  const frWindow = { low: 0.30, high: 0.70 };
+  const biasCfg = { base: 0.05, alpha: 0.20, betaJustDead: 0.10, cap: 0.25 };
+  const guardrail = { windowRefills: 50, maxDead: 1 };
+
+  // State
+  let grid = new Array(BOARD_SIZE).fill(0).map(()=>new Array(BOARD_SIZE).fill(0));
+  let pool = [null, null, null]; // Initialize with null slots
+  let score = 0;
+  let comboLevel = 0;
+  let selected = { from:"pool", index:-1, dx:0, dy:0 };
+  let hold = { piece:null, cd:0 };
+  let swapCD = 0;
+  let recentDead = [];
+  let justDead = false;
+  let turn = 0;
+  let highScore = localStorage.getItem('blockTetristHighScore') || 0;
+  let gameOver = false;
+  let blockedCells = [];
+  let comboTexts = [];
+
+  // 32 pieces with rotations (v1.4.0)
+  const PIECES = {
+    // 1x1 - 1 direction (symmetric)
+    "1x1":[[0,0]],
+    
+    // 1x2, 1x3, I3, I4, S4, Z4 - 2 directions (0°, 90°)
+    "1x2":[[0,0],[0,1]], "1x2_90":[[0,0],[1,0]],
+    "1x3":[[0,0],[0,1],[0,2]], "1x3_90":[[0,0],[1,0],[2,0]],
+    "I3":[[0,0],[1,0],[2,0]], "I3_90":[[0,0],[0,1],[0,2]],
+    "I4":[[0,0],[1,0],[2,0],[3,0]], "I4_90":[[0,0],[0,1],[0,2],[0,3]],
+    "S4":[[0,1],[0,2],[1,0],[1,1]], "S4_90":[[0,0],[1,0],[1,1],[2,1]],
+    "Z4":[[0,0],[0,1],[1,1],[1,2]], "Z4_90":[[0,1],[1,0],[1,1],[2,0]],
+    
+    // 2x2, O3 - 1 direction (symmetric)
+    "2x2":[[0,0],[0,1],[1,0],[1,1]],
+    "O3":[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+    
+    // L3, L4, T4 - 4 directions (0°, 90°, 180°, 270°)
+    "L3":[[0,0],[1,0],[1,1]], "L3_90":[[0,0],[0,1],[1,0]], "L3_180":[[0,0],[0,1],[1,1]], "L3_270":[[0,1],[1,0],[1,1]],
+    "L4":[[0,0],[1,0],[2,0],[2,1]], "L4_90":[[0,0],[0,1],[0,2],[1,0]], "L4_180":[[0,0],[0,1],[1,1],[2,1]], "L4_270":[[0,1],[1,1],[2,0],[2,1]],
+    "T4":[[0,0],[0,1],[0,2],[1,1]], "T4_90":[[0,0],[1,0],[1,1],[2,0]], "T4_180":[[0,1],[1,0],[1,1],[1,2]], "T4_270":[[0,1],[1,0],[1,1],[2,1]]
+  };
+  
+  // Piece colors for each rotation
+  const PIECE_COLORS = {
+    "1x1":"#ff6b6b", "1x2":"#51cf66", "1x3":"#339af0", "2x2":"#5de4c7",
+    "I3":"#ffd43b", "I4":"#f783ac", "L3":"#4c6ef5", "L4":"#ae3ec9",
+    "T4":"#ff6b6b", "S4":"#40c057", "Z4":"#e64980", "O3":"#ffa94d",
+    // Colors for rotated pieces (same as base)
+    "1x2_90":"#51cf66", "1x3_90":"#339af0", "I3_90":"#ffd43b", "I4_90":"#f783ac",
+    "S4_90":"#40c057", "Z4_90":"#e64980",
+    "L3_90":"#4c6ef5", "L3_180":"#4c6ef5", "L3_270":"#4c6ef5",
+    "L4_90":"#ae3ec9", "L4_180":"#ae3ec9", "L4_270":"#ae3ec9",
+    "T4_90":"#ff6b6b", "T4_180":"#ff6b6b", "T4_270":"#ff6b6b"
+  };
+  
+  // Base weights for all 32 pieces
+  const BASE_WEIGHTS = {
+    "1x1":0.02, "1x2":0.05, "1x3":0.06, "2x2":0.07, "L3":0.06, "I4":0.07, "L4":0.07, "T4":0.06, "S4":0.06, "Z4":0.06, "O3":0.05, "I3":0.05,
+    // Weights for rotated pieces (same as base)
+    "1x2_90":0.05, "1x3_90":0.06, "I3_90":0.05, "I4_90":0.07, "S4_90":0.06, "Z4_90":0.06,
+    "L3_90":0.06, "L3_180":0.06, "L3_270":0.06, "L4_90":0.07, "L4_180":0.07, "L4_270":0.07,
+    "T4_90":0.06, "T4_180":0.06, "T4_270":0.06
+  };
+
+  function rnd(){ return Math.random(); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function msg(t){ document.getElementById('msg').innerHTML = t; }
+  function debug(t){ document.getElementById('debug').innerHTML = t; }
+
+  function updateStats() {
+    document.getElementById('score-display').textContent = score;
+    document.getElementById('turn-display').textContent = turn;
+    document.getElementById('combo-display').textContent = Math.min(scoring.comboSteps[comboLevel], scoring.comboCap).toFixed(1) + '×';
+    document.getElementById('fr-display').textContent = Math.round(getFillRate() * 100) + '%';
+    
+    // Update high score
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('blockTetristHighScore', highScore);
+    }
+  }
+  
+  function checkGameOver() {
+    // Check if any piece can be placed
+    for(let i = 0; i < pool.length; i++) {
+      if(pool[i] && validPlacementsAny(pool[i])) return false;
+    }
+    if(hold.piece && validPlacementsAny(hold.piece)) return false;
+    return true;
+  }
+  
+  function resetGame() {
+    grid = new Array(BOARD_SIZE).fill(0).map(()=>new Array(BOARD_SIZE).fill(0));
+    pool = [null, null, null];
+    score = 0;
+    comboLevel = 0;
+    selected = { from:"pool", index:-1, dx:0, dy:0 };
+    hold = { piece:null, cd:0 };
+    swapCD = 0;
+    recentDead = [];
+    justDead = false;
+    turn = 0;
+    gameOver = false;
+    comboTexts = [];
+    generateBlockedCells();
+    refillPool();
+    render();
+  }
+  
+  // Make resetGame globally accessible
+  window.resetGame = resetGame;
+  
+  function addComboText(text, x, y) {
+    const comboText = {
+      text: text,
+      x: x,
+      y: y,
+      startTime: Date.now(),
+      id: Math.random()
+    };
+    comboTexts.push(comboText);
+    
+    // Remove after animation
+    setTimeout(() => {
+      comboTexts = comboTexts.filter(ct => ct.id !== comboText.id);
+    }, 2000);
+  }
+  
+  function drawComboTexts() {
+    const currentTime = Date.now();
+    comboTexts.forEach(ct => {
+      let elapsed = currentTime - ct.startTime;
+      let progress = elapsed / 2000; // 2 seconds total
+      
+      if(progress < 1) {
+        ctx.save();
+        ctx.globalAlpha = 1 - progress;
+        ctx.font = "48px system-ui";
+        ctx.fillStyle = "#5de4c7";
+        ctx.textAlign = "center";
+        ctx.fillText(ct.text, ct.x, ct.y - progress * 40);
+        ctx.restore();
+      }
+    });
+  }
+
+  function normalize(weights){
+    let s=0; for (const k in weights) s+=weights[k];
+    const out={}; for (const k in weights) out[k]=weights[k]/s;
+    return out;
+  }
+  function applyBias(base, keys, factor){
+    const out = {...base};
+    for(const k of keys){ if(out[k]!=null) out[k]*=(1+factor); }
+    return normalize(out);
+  }
+  function sampleOne(weights){
+    const r = rnd(); let acc=0, last=null;
+    for(const k in weights){ acc+=weights[k]; last=k; if(r<=acc) return makePiece(k); }
+    return makePiece(last);
+  }
+  function sampleThree(weights){ return [sampleOne(weights), sampleOne(weights), sampleOne(weights)]; }
+  function makePiece(key){ 
+    return { 
+      id: key, 
+      cells: PIECES[key].map(p=>({r:p[0], c:p[1]})),
+      color: PIECE_COLORS[key] || "#9aa5ff"
+    }; 
+  }
+
+  function getFillRate(){
+    let filled=0;
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isBlockedCell(r,c)) filled++;
+    return filled/(BOARD_SIZE*BOARD_SIZE);
+  }
+  
+  function isBlockedCell(r, c) {
+    return blockedCells.some(cell => cell.r === r && cell.c === c);
+  }
+  
+  function generateBlockedCells() {
+    let count = Math.floor(Math.random() * 7) + 6; // 6-12 cells
+    blockedCells = [];
+    for(let i = 0; i < count; i++) {
+      let r, c;
+      do {
+        r = Math.floor(Math.random() * BOARD_SIZE);
+        c = Math.floor(Math.random() * BOARD_SIZE);
+      } while(isBlockedCell(r, c) || (r === 0 && c === 0)); // Avoid top-left corner
+      blockedCells.push({r, c});
+    }
+  }
+  function canPlace(piece, R, C){
+    for(const cell of piece.cells){
+      let rr=R+cell.r, cc=C+cell.c;
+      if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
+      if(grid[rr][cc] || isBlockedCell(rr, cc)) return false;
+    }
+    return true;
+  }
+  function validPlacementsAny(p){
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(canPlace(p, r, c)) return true;
+    return false;
+  }
+  function placePiece(piece, R, C){
+    let placed=0;
+    for(const cell of piece.cells){ let rr=R+cell.r, cc=C+cell.c; grid[rr][cc]=1; placed++; }
+    return placed;
+  }
+  function clearLines(){
+    const clearedRows=[], clearedCols=[];
+    for(let r=0;r<BOARD_SIZE;r++){ 
+      let full=true; 
+      for(let c=0;c<BOARD_SIZE;c++){ 
+        if(!grid[r][c] && !isBlockedCell(r,c)){full=false;break;} 
+      } 
+      if(full) clearedRows.push(r); 
+    }
+    for(let c=0;c<BOARD_SIZE;c++){ 
+      let full=true; 
+      for(let r=0;r<BOARD_SIZE;r++){ 
+        if(!grid[r][c] && !isBlockedCell(r,c)){full=false;break;} 
+      } 
+      if(full) clearedCols.push(c); 
+    }
+    
+    // Clear rows and columns, including blocked cells
+    for(let rr of clearedRows){ 
+      for(let c=0;c<BOARD_SIZE;c++) { 
+        grid[rr][c]=0; 
+        // Remove blocked cells in cleared rows
+        blockedCells = blockedCells.filter(cell => !(cell.r === rr && cell.c === c));
+      } 
+    }
+    for(let cc of clearedCols){ 
+      for(let r=0;r<BOARD_SIZE;r++) { 
+        grid[r][cc]=0; 
+        // Remove blocked cells in cleared columns
+        blockedCells = blockedCells.filter(cell => !(cell.r === r && cell.c === cc));
+      } 
+    }
+    return {rows:clearedRows, cols:clearedCols};
+  }
+
+  function getBiasFactor(FR){
+    let f = biasCfg.base;
+    if(FR > frWindow.high) f += biasCfg.alpha*(FR - frWindow.high);
+    if(justDead) f += biasCfg.betaJustDead;
+    return Math.min(f, biasCfg.cap);
+  }
+
+  function refillPool(){
+    let FR = getFillRate();
+    let weights = normalize(BASE_WEIGHTS);
+    let factor = getBiasFactor(FR);
+    weights = applyBias(weights, swapCfg.rescueSet, factor);
+    
+    // Always ensure we have 3 pieces - refill all null slots
+    let refilledCount = 0;
+    for(let i = 0; i < pool.length; i++) {
+      if(pool[i] === null) {
+        pool[i] = sampleOne(weights);
+        refilledCount++;
+      }
+    }
+    
+    // Log refill info
+    console.log(`Refilled ${refilledCount} slots. Pool now has:`, pool.map(p => p ? p.id : 'null'));
+    console.log('Pool array:', pool);
+    console.log('Pool length:', pool.length);
+    console.log('Pool null count:', pool.filter(p => p === null).length);
+    
+    let placeable = pool.some(pc => pc && validPlacementsAny(pc));
+
+    if(!placeable){
+      // Repair step 1: replace one with rescue
+      let idx = Math.floor(rnd()*3);
+      let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+      pool[idx] = makePiece(rk);
+      placeable = pool.some(pc => pc && validPlacementsAny(pc));
+      // Repair step 2: resample once if still dead
+      if(!placeable){
+        pool[idx] = sampleOne(weights);
+        placeable = pool.some(pc => pc && validPlacementsAny(pc));
+      }
+    }
+
+    // Update DSR window + guardrail
+    recentDead.push(placeable?0:1); if(recentDead.length>guardrail.windowRefills) recentDead.shift();
+    justDead = !placeable;
+          if(!placeable){
+        let sum = recentDead.reduce((a,b)=>a+b,0);
+        if(sum >= guardrail.maxDead){
+        // Force fix again
+        let idx = Math.floor(rnd()*3);
+        let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+        pool[idx] = makePiece(rk);
+        placeable = pool.some(pc => pc && validPlacementsAny(pc));
+        recentDead[recentDead.length-1] = placeable?0:1; // update last flag
+        justDead = !placeable;
+      }
+    }
+
+    comboLevel = 0; // reset combo at refill start
+    
+    // Debug info
+    debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}`);
+    
+    render();
+  }
+
+  // Input mapping
+  function gridAt(x,y){
+    let gx = Math.floor((x-BOARD_X)/CELL);
+    let gy = Math.floor((y-BOARD_Y)/CELL);
+    if(gx>=0&&gx<BOARD_SIZE&&gy>=0&&gy<BOARD_SIZE) return {c:gx,r:gy};
+    return null;
+  }
+  function poolSlotAt(x,y){
+    // Three slots centered
+    let gap = 12, box = 140;
+    let totalW = box*3 + gap*2;
+    let left = (W-totalW)/2;
+    let top = POOL_Y;
+    for(let i=0;i<3;i++){
+      let rx=left + i*(box+gap), ry=top;
+      if(x>=rx && x<=rx+box && y>=ry && y<=ry+box) return i;
+    }
+    return -1;
+  }
+
+  canvas.addEventListener('contextmenu', e=>e.preventDefault());
+  canvas.addEventListener('mousedown', (e)=>{
+    let rect=canvas.getBoundingClientRect();
+    let x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(e.button===2){ selected.index=-1; render(); return; }
+
+    // If clicking pool slot -> select piece
+          let slot = poolSlotAt(x,y);
+      if(slot>=0 && pool[slot] !== null){
+      selected = { from:"pool", index:slot, dx:0, dy:0 };
+      render(); return;
+    }
+
+    // If have selection, try placing on board
+    if(selected.index>=0){
+      let g = gridAt(x,y);
+      if(g){
+        let piece = pool[selected.index];
+        if(canPlace(piece, g.r, g.c)){
+          let placedCells = placePiece(piece, g.r, g.c);
+          let cleared = clearLines();
+          // scoring
+          const lines = cleared.rows.length + cleared.cols.length;
+          score += placedCells*scoring.cell + lines*scoring.line;
+          if(lines>=3) score = Math.floor(score*scoring.precisionThree);
+          else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
+          // combo
+          if(lines>0) comboLevel = Math.min(comboLevel+1, scoring.comboSteps.length-1);
+          else comboLevel = 0;
+          score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
+          
+          // Add combo text (v1.4.1)
+          if(lines > 0) {
+            let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
+            let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
+            let comboText = "Good";
+            if(lines >= 3) comboText = "Exceptional!";
+            else if(lines >= 2) comboText = "Great!";
+            addComboText(comboText, centerX, centerY);
+          }
+
+          // consume piece
+          pool[selected.index] = null;
+          selected.index=-1;
+          turn++;
+          if(swapCD>0) swapCD--;
+          if(hold.cd>0) hold.cd--;
+
+          // Check for game over
+          if(checkGameOver()) {
+            gameOver = true;
+            render();
+            return;
+          }
+
+          // Auto refill if needed
+          if(pool.every(p => p === null)) {
+            refillPool();
+          } else {
+            render();
+          }
+          return;
+        }
+      }
+    }
+
+    // If click on hold area to release (simple: if pool has <3, push back)
+    let holdRect = {x:40, y:POOL_Y+160, w:180, h:80};
+    if(x>=holdRect.x && x<=holdRect.x+holdRect.w && y>=holdRect.y && y<=holdRect.y+holdRect.h){
+      if(hold.piece){
+        // Find first empty slot
+        let emptySlot = pool.findIndex(p => p === null);
+        if(emptySlot !== -1) {
+          pool[emptySlot] = hold.piece;
+          hold.piece = null;
+          render();
+          return;
+        }
+      }
+    }
+  });
+
+  // UI buttons via keys for simplicity
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='h' || e.key==='H'){
+      // Hold selected piece - chỉ khi có khối được chọn và hold slot trống
+      if(selected.index>=0 && !hold.piece && hold.cd<=0){
+        hold.piece = pool[selected.index];
+        pool[selected.index] = null;
+        hold.cd = holdCfg.cdTurns;
+        selected.index=-1;
+        
+        // Auto refill if pool is empty
+        if(pool.every(p => p === null)) {
+          refillPool();
+        } else {
+          render();
+        }
+      }
+    } else if(e.key==='1' || e.key==='2' || e.key==='3'){
+      // Swap piece index 0/1/2 - chỉ khi swapCD = 0
+      let idx = parseInt(e.key,10)-1;
+      if(idx>=0 && idx<pool.length){
+        if(swapCD<=0){
+          let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+          pool[idx] = makePiece(rk);
+          swapCD = swapCfg.cdTurns;
+          
+          // Check for game over after swap
+          if(checkGameOver()) {
+            gameOver = true;
+          }
+          render();
+        }
+      }
+    }
+  });
+
+  function drawBoard(){
+    // grid
+    for(let r=0;r<BOARD_SIZE;r++){
+      for(let c=0;c<BOARD_SIZE;c++){
+        let x = BOARD_X + c*CELL, y = BOARD_Y + r*CELL;
+        
+        if(isBlockedCell(r, c)) {
+          // Draw blocked cell (red)
+          ctx.fillStyle = "#f7768e";
+          ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+          ctx.strokeStyle = "#d73a49";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+        } else if(grid[r][c]) {
+          // Draw placed piece
+          ctx.fillStyle = "#5865f2";
+          ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+        } else {
+          // Draw empty cell
+          ctx.fillStyle = "#1c2342";
+          ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+          ctx.strokeStyle = "#2a3156";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+        }
+      }
+    }
+    
+    // header stats
+    let FR = getFillRate();
+    let multiplier = Math.min(scoring.comboSteps[comboLevel], scoring.comboCap).toFixed(2);
+    ctx.fillStyle="#E8EBF7";
+    ctx.font="bold 16px system-ui";
+    ctx.fillText(`Điểm: ${score}`, BOARD_X, BOARD_Y-12);
+    ctx.fillText(`FR: ${(FR*100).toFixed(0)}%`, BOARD_X+150, BOARD_Y-12);
+    ctx.fillText(`Chain ×${multiplier}`, BOARD_X+250, BOARD_Y-12);
+    
+    // High score indicator
+    if(score >= highScore && score > 0) {
+      ctx.fillStyle = "#5de4c7";
+      ctx.font = "bold 14px system-ui";
+      ctx.fillText("🏆 HIGH SCORE!", BOARD_X+400, BOARD_Y-12);
+    }
+  }
+
+  function drawPieceAt(piece, px, py, scale=1.0, color=null){
+    let size = CELL*scale;
+    // compute min bounds to align
+    let minr=Infinity, minc=Infinity;
+    for(const cell of piece.cells){ if(cell.r<minr) minr=cell.r; if(cell.c<minc) minc=cell.c; }
+    
+    // Use piece color if available, otherwise use provided color
+    let pieceColor = color || piece.color || "#9aa5ff";
+    
+    for(const cell of piece.cells){
+      let x = px + (cell.c - minc)*size;
+      let y = py + (cell.r - minr)*size;
+      ctx.fillStyle = pieceColor;
+      ctx.fillRect(x+3,y+3,size-6,size-6);
+      ctx.strokeStyle="#101425"; ctx.lineWidth=2; ctx.strokeRect(x+3,y+3,size-6,size-6);
+    }
+  }
+
+  function drawPool(){
+    let gap = 12, box = 140;
+    let totalW = box*3 + gap*2;
+    let left = (W-totalW)/2;
+    let top = POOL_Y;
+
+    // Draw pool title
+    ctx.fillStyle = "#E8EBF7";
+    ctx.font = "bold 16px system-ui";
+    ctx.fillText("POOL - Chọn khối để đặt", left, top - 20);
+    
+    // Debug: Show pool state
+    ctx.fillStyle = "#f7768e";
+    ctx.font = "12px system-ui";
+    ctx.fillText(`Debug: Pool has ${pool.filter(p => p !== null).length}/3 pieces`, left, top - 5);
+    
+    ctx.font="bold 14px system-ui";
+    for(let i=0;i<3;i++){
+      let x=left+i*(box+gap), y=top;
+      
+      // Always draw all 3 slots regardless of content
+      ctx.strokeStyle = (selected.index===i?"#5de4c7":"#2a3156");
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x, y, box, box);
+      
+      // Slot background
+      ctx.fillStyle = "rgba(43, 51, 92, 0.3)";
+      ctx.fillRect(x+1, y+1, box-2, box-2);
+
+      if(pool[i] !== null){
+        // Draw piece
+        drawPieceAt(pool[i], x+20, y+20, 0.6, selected.index===i?"#5de4c7":null);
+      } else {
+        // Show empty slot
+        ctx.fillStyle="#2a3156"; 
+        ctx.fillRect(x+20, y+20, 100, 100);
+        ctx.strokeStyle = "#3a4376";
+        ctx.strokeRect(x+20, y+20, 100, 100);
+        ctx.fillStyle = "#8b90a7";
+        ctx.font = "12px system-ui";
+        ctx.fillText("Empty", x+box/2-20, y+box/2+5);
+      }
+      
+      // Slot label
+      ctx.fillStyle="#E8EBF7";
+      ctx.fillText(`Slot ${i+1}`, x+6, y+16);
+      
+      // Swap tip
+      ctx.fillStyle = swapCD>0? "#8b90a7" : "#a6da95";
+      ctx.font = "12px system-ui";
+      ctx.fillText(`Swap: phím ${i+1} ${swapCD>0?`(CD ${swapCD})`:""}`, x+6, y=box-8);
+    }
+
+    // Hold panel - moved to better position
+    let hx=40, hy=POOL_Y+160, hw=180, hh=80;
+    ctx.strokeStyle="#2a3156"; 
+    ctx.lineWidth = 2;
+    ctx.strokeRect(hx,hy,hw,hh);
+    
+    // Hold background
+    ctx.fillStyle = "rgba(43, 51, 92, 0.3)";
+    ctx.fillRect(hx+1, hy+1, hw-2, hh-2);
+    
+    ctx.fillStyle="#E8EBF7"; 
+    ctx.font = "bold 14px system-ui";
+    ctx.fillText("Hold (phím H)", hx+8, hy+16);
+    ctx.fillText(hold.cd>0?`CD: ${hold.cd}`:"", hx+8, hy+34);
+    
+    if(hold.piece){ 
+      drawPieceAt(hold.piece, hx+100, hy+20, 0.45, "#ffd580"); 
+    } else {
+      // Show empty hold slot
+      ctx.fillStyle = "#2a3156";
+      ctx.fillRect(hx+100, hy+20, 60, 60);
+      ctx.strokeStyle = "#3a4376";
+      ctx.strokeRect(hx+100, hy+20, 60, 60);
+    }
+
+    // Hint
+    ctx.fillStyle="#8b90a7";
+    ctx.fillText("Chọn Slot → click ô bàn để đặt. Chuột phải: bỏ chọn.", W-370, POOL_Y+200);
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    
+    // Debug: Log pool state before drawing
+    console.log('Render - Pool state:', pool);
+    console.log('Render - Pool length:', pool.length);
+    console.log('Render - Pool null count:', pool.filter(p => p === null).length);
+    
+    drawBoard();
+    drawPool();
+    drawComboTexts();
+    updateStats();
+
+    let FR = getFillRate();
+    let fairness = justDead? "Có lượt kẹt gần đây" : "Ổn";
+    let ftxt = FR>0.7? "Căng" : (FR<0.3? "Rộng" : "Đẹp");
+    msg(
+      `<h3>📊 Thông Tin Game</h3>` +
+      `Turn <b>${turn}</b> • <span class="${FR<0.3?"ok":(FR>0.7?"bad":"warn")}">FR: ${(FR*100).toFixed(0)}% (${ftxt})</span>` +
+      ` • High Score: <span class="hl">${highScore}</span><br/>` +
+      `<span class="legend">Swap: phím 1/2/3 • Hold: phím H • Chuột phải: bỏ chọn</span>`
+    );
+    
+    // Show game over overlay if game is over
+    if(gameOver) {
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-turn').textContent = turn;
+      document.getElementById('final-high-score').textContent = highScore;
+      document.getElementById('game-over-overlay').style.display = 'flex';
+    } else {
+      document.getElementById('game-over-overlay').style.display = 'none';
+    }
+  }
+
+  // Boot
+  generateBlockedCells();
+  
+      // Ensure pool starts with 3 pieces
+    pool = [null, null, null];
+    console.log("Initial pool:", pool);
+    
+    refillPool();
+    console.log("After refillPool:", pool);
+    
+    // Double check pool has 3 pieces
+    if(pool.some(p => p === null)) {
+      console.log("Pool not properly filled, refilling...");
+      refillPool();
+      console.log("After second refill:", pool);
+    }
+    
+    // Final check and log
+    console.log("Final pool state:", pool);
+    console.log("Final pool length:", pool.length);
+    console.log("Final pool pieces:", pool.filter(p => p !== null).length);
+    
+    // Force render to show debug info
+    setTimeout(() => {
+      console.log("Delayed pool check:", pool);
+      render();
+    }, 100);
+  
+  render();
+})();
+</script>
+</body>
+</html>

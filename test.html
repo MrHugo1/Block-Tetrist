@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BB+ Test v1.0.1 - Block Tetrist Game</title>
+<style>
+  html, body { margin:0; padding:0; background:#0f1220; color:#E8EBF7; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  #wrap { display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; }
+  canvas { background:#151a2d; border:1px solid #2a3156; border-radius:10px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
+  .card { background:#161a30; border:1px solid #2b335c; padding:10px 12px; border-radius:12px; }
+  button { background:#2a3156; color:#E8EBF7; border:1px solid #3a4376; border-radius:10px; padding:8px 12px; cursor:pointer; }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  .stat { margin:2px 8px; font-size:14px; opacity:.9; }
+  h1 { margin:8px 0 0; font-size:18px; font-weight:700; }
+  small { opacity:.7; }
+  .legend { font-size:13px; opacity:.8; line-height:1.4; }
+  .hl { color:#5de4c7; font-weight:600; }
+  .warn { color:#f9c859; }
+  .bad { color:#f7768e; }
+  .ok { color:#a6da95; }
+  .version { position:absolute; top:10px; right:10px; font-size:12px; opacity:0.6; }
+  .debug { position:absolute; top:40px; right:10px; font-size:10px; opacity:0.8; background:#1a1a1a; padding:5px; border-radius:5px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="version">v1.0.1 TEST</div>
+  <div class="debug" id="debug"></div>
+  <h1>BB+ Prototype — Board 8×8</h1>
+  <small>Click chọn khối (dưới), sau đó click lên ô trên bàn để đặt. Chuột phải = bỏ chọn.</small>
+  <canvas id="game" width="720" height="900"></canvas>
+  <div class="row">
+    <div class="card legend">
+      <b>Controls</b>: Chọn khối → click ô để đặt. <span class="hl">Hold</span> lưu 1 khối (CD 3 lượt). 
+      <span class="hl">Swap</span> đổi 1 khối sang khối cứu nạn (CD 9 lượt). <br/>
+      <b>Chain</b>: clear liên tiếp tăng multiplier (≤1.5×). <b>Precision</b>: clear ≥2 line nhân điểm (1.2× / 1.5×).
+    </div>
+    <div class="card legend" id="msg"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const W = 720, H = 900;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // Layout
+  const BOARD_SIZE = 8;
+  const CELL = 60; // cell px
+  const BOARD_X = (W - CELL*BOARD_SIZE)/2; // center
+  const BOARD_Y = 40;
+  const POOL_Y = 620;
+
+  // Tuning
+  const scoring = {
+    cell: 1,
+    line: 10,
+    precisionTwo: 1.2,
+    precisionThree: 1.5,
+    comboSteps: [1.0, 1.1, 1.3, 1.5],
+    comboCap: 1.5
+  };
+  const holdCfg = { cdTurns: 3 };
+  const swapCfg = { cdTurns: 9, rescueSet: ["1x2","1x3","I3","L3"] };
+  const frWindow = { low: 0.30, high: 0.70 };
+  const biasCfg = { base: 0.05, alpha: 0.20, betaJustDead: 0.10, cap: 0.25 };
+  const guardrail = { windowRefills: 50, maxDead: 1 };
+
+  // State
+  let grid = new Array(BOARD_SIZE).fill(0).map(()=>new Array(BOARD_SIZE).fill(0));
+  let pool = [];
+  let score = 0;
+  let comboLevel = 0;
+  let selected = { from:"pool", index:-1, dx:0, dy:0 };
+  let hold = { piece:null, cd:0 };
+  let swapCD = 0;
+  let recentDead = [];
+  let justDead = false;
+  let turn = 0;
+
+  const PIECES = {
+    "1x1":[[0,0]],
+    "1x2":[[0,0],[0,1]],
+    "1x3":[[0,0],[0,1],[0,2]],
+    "2x2":[[0,0],[0,1],[1,0],[1,1]],
+    "I3":[[0,0],[1,0],[2,0]],
+    "I4":[[0,0],[1,0],[2,0],[3,0]],
+    "L3":[[0,0],[1,0],[1,1]],
+    "L4":[[0,0],[1,0],[2,0],[2,1]],
+    "T4":[[0,0],[0,1],[0,2],[1,1]],
+    "S4":[[0,1],[0,2],[1,0],[1,1]],
+    "Z4":[[0,0],[0,1],[1,1],[1,2]],
+    "O3":[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]]
+  };
+  const BASE_WEIGHTS = {"1x1":0.02,"1x2":0.05,"1x3":0.06,"2x2":0.07,"L3":0.06,"I4":0.07,"L4":0.07,"T4":0.06,"S4":0.06,"Z4":0.06,"O3":0.05,"I3":0.05};
+
+  function rnd(){ return Math.random(); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+  function msg(t){ document.getElementById('msg').innerHTML = t; }
+  function debug(t){ document.getElementById('debug').innerHTML = t; }
+
+  function normalize(weights){
+    let s=0; for (const k in weights) s+=weights[k];
+    const out={}; for (const k in weights) out[k]=weights[k]/s;
+    return out;
+  }
+  function applyBias(base, keys, factor){
+    const out = {...base};
+    for(const k of keys){ if(out[k]!=null) out[k]*=(1+factor); }
+    return normalize(out);
+  }
+  function sampleOne(weights){
+    const r = rnd(); let acc=0, last=null;
+    for(const k in weights){ acc+=weights[k]; last=k; if(r<=acc) return makePiece(k); }
+    return makePiece(last);
+  }
+  function sampleThree(weights){ return [sampleOne(weights), sampleOne(weights), sampleOne(weights)]; }
+  function makePiece(key){ return { id:key, cells: PIECES[key].map(p=>({r:p[0], c:p[1]})) }; }
+
+  function getFillRate(){
+    let filled=0;
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c]) filled++;
+    return filled/(BOARD_SIZE*BOARD_SIZE);
+  }
+  function canPlace(piece, R, C){
+    for(const cell of piece.cells){
+      let rr=R+cell.r, cc=C+cell.c;
+      if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
+      if(grid[rr][cc]) return false;
+    }
+    return true;
+  }
+  function validPlacementsAny(p){
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(canPlace(p, r, c)) return true;
+    return false;
+  }
+  function placePiece(piece, R, C){
+    let placed=0;
+    for(const cell of piece.cells){ let rr=R+cell.r, cc=C+cell.c; grid[rr][cc]=1; placed++; }
+    return placed;
+  }
+  function clearLines(){
+    const clearedRows=[], clearedCols=[];
+    for(let r=0;r<BOARD_SIZE;r++){ let full=true; for(let c=0;c<BOARD_SIZE;c++){ if(!grid[r][c]){full=false;break;} } if(full) clearedRows.push(r); }
+    for(let c=0;c<BOARD_SIZE;c++){ let full=true; for(let r=0;r<BOARD_SIZE;r++){ if(!grid[r][c]){full=false;break;} } if(full) clearedCols.push(c); }
+    for(let rr of clearedRows){ for(let c=0;c<BOARD_SIZE;c++) grid[rr][c]=0; }
+    for(let cc of clearedCols){ for(let r=0;r<BOARD_SIZE;r++) grid[r][cc]=0; }
+    return {rows:clearedRows, cols:clearedCols};
+  }
+
+  function getBiasFactor(FR){
+    let f = biasCfg.base;
+    if(FR > frWindow.high) f += biasCfg.alpha*(FR - frWindow.high);
+    if(justDead) f += biasCfg.betaJustDead;
+    return Math.min(f, biasCfg.cap);
+  }
+
+  function refillPool(){
+    const FR = getFillRate();
+    let weights = normalize(BASE_WEIGHTS);
+    const factor = getBiasFactor(FR);
+    weights = applyBias(weights, swapCfg.rescueSet, factor);
+    let p = sampleThree(weights); // Đảm bảo luôn tạo ra 3 items
+    let placeable = p.some(pc=>validPlacementsAny(pc));
+
+    if(!placeable){
+      // Repair step 1: replace one with rescue
+      const idx = Math.floor(rnd()*3);
+      const rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+      p[idx] = makePiece(rk);
+      placeable = p.some(pc=>validPlacementsAny(pc));
+      // Repair step 2: resample once if still dead
+      if(!placeable){
+        p = sampleThree(weights);
+        placeable = p.some(pc=>validPlacementsAny(pc));
+      }
+    }
+
+    // Update DSR window + guardrail
+    recentDead.push(placeable?0:1); if(recentDead.length>guardrail.windowRefills) recentDead.shift();
+    justDead = !placeable;
+    if(!placeable){
+      const sum = recentDead.reduce((a,b)=>a+b,0);
+      if(sum >= guardrail.maxDead){
+        // Force fix again
+        const idx = Math.floor(rnd()*3);
+        const rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+        p[idx] = makePiece(rk);
+        placeable = p.some(pc=>validPlacementsAny(pc));
+        recentDead[recentDead.length-1] = placeable?0:1; // update last flag
+        justDead = !placeable;
+      }
+    }
+
+    pool = p;
+    comboLevel = 0; // reset combo at refill start
+    
+    // Debug info
+    debug(`Pool: ${pool.length} items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}`);
+    
+    render();
+  }
+
+  // Input mapping
+  function gridAt(x,y){
+    const gx = Math.floor((x-BOARD_X)/CELL);
+    const gy = Math.floor((y-BOARD_Y)/CELL);
+    if(gx>=0&&gx<BOARD_SIZE&&gy>=0&&gy<BOARD_SIZE) return {c:gx,r:gy};
+    return null;
+  }
+  function poolSlotAt(x,y){
+    // Three slots centered
+    const gap = 12, box = 140;
+    const totalW = box*3 + gap*2;
+    const left = (W-totalW)/2;
+    const top = POOL_Y;
+    for(let i=0;i<3;i++){
+      let rx=left + i*(box+gap), ry=top;
+      if(x>=rx && x<=rx+box && y>=ry && y<=ry+box) return i;
+    }
+    return -1;
+  }
+
+  canvas.addEventListener('contextmenu', e=>e.preventDefault());
+  canvas.addEventListener('mousedown', (e)=>{
+    const rect=canvas.getBoundingClientRect();
+    const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(e.button===2){ selected.index=-1; render(); return; }
+
+    // If clicking pool slot -> select piece
+    const slot = poolSlotAt(x,y);
+    if(slot>=0 && pool[slot]){
+      selected = { from:"pool", index:slot, dx:0, dy:0 };
+      render(); return;
+    }
+
+    // If have selection, try placing on board
+    if(selected.index>=0){
+      const g = gridAt(x,y);
+      if(g){
+        const piece = pool[selected.index];
+        if(canPlace(piece, g.r, g.c)){
+          const placedCells = placePiece(piece, g.r, g.c);
+          const cleared = clearLines();
+          // scoring
+          const lines = cleared.rows.length + cleared.cols.length;
+          score += placedCells*scoring.cell + lines*scoring.line;
+          if(lines>=3) score = Math.floor(score*scoring.precisionThree);
+          else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
+          // combo
+          if(lines>0) comboLevel = Math.min(comboLevel+1, scoring.comboSteps.length-1);
+          else comboLevel = 0;
+          score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
+
+          // consume piece
+          pool.splice(selected.index,1);
+          selected.index=-1;
+          turn++;
+          if(swapCD>0) swapCD--;
+          if(hold.cd>0) hold.cd--;
+
+          if(pool.length===0){
+            refillPool(); // Tự động refill khi hết pool
+          } else {
+            render();
+          }
+          return;
+        }
+      }
+    }
+
+    // If click on hold area to release (simple: if pool has <3, push back)
+    const holdRect = {x:40, y:POOL_Y+160, w:180, h:80};
+    if(x>=holdRect.x && x<=holdRect.x+holdRect.w && y>=holdRect.y && y<=holdRect.y+holdRect.h){
+      if(hold.piece && pool.length<3){
+        pool.push(hold.piece); hold.piece=null;
+        render();
+        return;
+      }
+    }
+  });
+
+  // UI buttons via keys for simplicity
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='h' || e.key==='H'){
+      // Hold selected piece - chỉ khi có khối được chọn và hold slot trống
+      if(selected.index>=0 && !hold.piece && hold.cd<=0){
+        hold.piece = pool[selected.index];
+        pool.splice(selected.index,1);
+        hold.cd = holdCfg.cdTurns;
+        selected.index=-1;
+        render();
+      }
+    } else if(e.key==='1' || e.key==='2' || e.key==='3'){
+      // Swap piece index 0/1/2 - chỉ khi swapCD = 0
+      const idx = parseInt(e.key,10)-1;
+      if(idx>=0 && idx<pool.length){
+        if(swapCD<=0){
+          const rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+          pool[idx] = makePiece(rk);
+          swapCD = swapCfg.cdTurns;
+          render();
+        }
+      }
+    }
+  });
+
+  function drawBoard(){
+    // grid
+    for(let r=0;r<BOARD_SIZE;r++){
+      for(let c=0;c<BOARD_SIZE;c++){
+        let x = BOARD_X + c*CELL, y = BOARD_Y + r*CELL;
+        ctx.fillStyle = grid[r][c]? "#5865f2" : "#1c2342";
+        ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+      }
+    }
+    // header stats
+    const FR = getFillRate();
+    const multiplier = Math.min(scoring.comboSteps[comboLevel], scoring.comboCap).toFixed(2);
+    ctx.fillStyle="#E8EBF7";
+    ctx.font="16px system-ui";
+    ctx.fillText(`Điểm: ${score}`, BOARD_X, BOARD_Y-12);
+    ctx.fillText(`FR: ${(FR*100).toFixed(0)}%`, BOARD_X+150, BOARD_Y-12);
+    ctx.fillText(`Chain ×${multiplier}`, BOARD_X+250, BOARD_Y-12);
+  }
+
+  function drawPieceAt(piece, px, py, scale=1.0, color="#9aa5ff"){
+    const size = CELL*scale;
+    // compute min bounds to align
+    let minr=Infinity, minc=Infinity;
+    for(const cell of piece.cells){ if(cell.r<minr) minr=cell.r; if(cell.c<minc) minc=cell.c; }
+    for(const cell of piece.cells){
+      let x = px + (cell.c - minc)*size;
+      let y = py + (cell.r - minr)*size;
+      ctx.fillStyle = color;
+      ctx.fillRect(x+3,y+3,size-6,size-6);
+      ctx.strokeStyle="#101425"; ctx.lineWidth=2; ctx.strokeRect(x+3,y+3,size-6,size-6);
+    }
+  }
+
+  function drawPool(){
+    const gap = 12, box = 140;
+    const totalW = box*3 + gap*2;
+    const left = (W-totalW)/2;
+    const top = POOL_Y;
+
+    ctx.font="14px system-ui";
+    for(let i=0;i<3;i++){
+      let x=left+i*(box+gap), y=top;
+      ctx.strokeStyle = (selected.index===i?"#5de4c7":"#2a3156");
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, box, box);
+
+      if(pool[i]){
+        drawPieceAt(pool[i], x+20, y+20, 0.6, selected.index===i?"#5de4c7":"#8093ff");
+      } else {
+        ctx.fillStyle="#2a3156"; ctx.fillRect(x+1,y+1,box-2,box-2);
+      }
+      ctx.fillStyle="#E8EBF7";
+      ctx.fillText(`Slot ${i+1}`, x+6, y+16);
+      // Swap tip
+      ctx.fillStyle = swapCD>0? "#8b90a7" : "#a6da95";
+      ctx.fillText(`Swap: phím ${i+1} ${swapCD>0?`(CD ${swapCD})`:""}`, x+6, y=box-8);
+    }
+
+    // Hold panel
+    let hx=40, hy=POOL_Y+160, hw=180, hh=80;
+    ctx.strokeStyle="#2a3156"; ctx.strokeRect(hx,hy,hw,hh);
+    ctx.fillStyle="#E8EBF7"; ctx.fillText("Hold (phím H)", hx+8, hy+16);
+    ctx.fillText(hold.cd>0?`CD: ${hold.cd}`:"", hx+8, hy+34);
+    if(hold.piece){ drawPieceAt(hold.piece, hx+100, hy+20, 0.45, "#ffd580"); }
+
+    // Hint
+    ctx.fillStyle="#8b90a7";
+    ctx.fillText("Chọn Slot → click ô bàn để đặt. Chuột phải: bỏ chọn.", W-370, POOL_Y+200);
+  }
+
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    drawBoard();
+    drawPool();
+
+    const FR = getFillRate();
+    const fairness = justDead? "Có lượt kẹt gần đây" : "Ổn";
+    const ftxt = FR>0.7? "Căng" : (FR<0.3? "Rộng" : "Đẹp");
+    msg(
+      `Turn <b>${turn}</b> • <span class="${FR<0.3?"ok":(FR>0.7?"bad":"warn")}">FR: ${(FR*100).toFixed(0)}% (${ftxt})</span>`
+      + ` • Guardrail window: ${recentDead.slice(-10).join("") || "(trống)"}<br/>`
+      + `<span class="legend">Swap: phím 1/2/3 • Hold: phím H • Chuột phải: bỏ chọn</span>`
+    );
+  }
+
+  // Boot
+  refillPool();
+  render();
+})();</script>
+</body>
+</html>

@@ -304,7 +304,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.6.0</div>
+     <div class="version">v1.6.2</div>
   <div class="debug" id="debug"></div>
   
   <div class="header">
@@ -651,26 +651,40 @@
   
   function generateBonusPieces() {
     // 30% chance to spawn bonus pieces after line clear
-    if (Math.random() > 0.3) return;
+    if (Math.random() > 0.3) {
+      console.log("Bonus spawn failed: 30% chance not met");
+      return;
+    }
     
     // Don't spawn if already at max (4 pieces)
-    if (bonusPieces.length >= 4) return;
+    if (bonusPieces.length >= 4) {
+      console.log("Bonus spawn failed: Already at max (4 pieces)");
+      return;
+    }
     
-    // Find existing pieces on the board to place bonus on
+    // Find positions on EXISTING pieces (not empty cells) to place bonus on
     let availablePositions = [];
     for(let r = 0; r < BOARD_SIZE; r++) {
       for(let c = 0; c < BOARD_SIZE; c++) {
-        if(grid[r][c] && !isDurablePiece(r, c) && !isBonusPiece(r, c)) {
+        // Only spawn on cells that have pieces (grid[r][c] = 1) or durable pieces
+        if((grid[r][c] || isDurablePiece(r, c)) && !isBonusPiece(r, c)) {
           availablePositions.push({r: r, c: c});
         }
       }
     }
     
-    if(availablePositions.length === 0) return;
+    if(availablePositions.length === 0) {
+      console.log("Bonus spawn failed: No available positions on existing pieces");
+      return;
+    }
+    
+    console.log(`Bonus spawn: Found ${availablePositions.length} available positions on existing pieces`);
     
     // Spawn 2-3 bonus pieces
     let spawnCount = Math.floor(Math.random() * 2) + 2; // 2-3 pieces
     spawnCount = Math.min(spawnCount, 4 - bonusPieces.length, availablePositions.length);
+    
+    console.log(`Bonus spawn: Attempting to spawn ${spawnCount} pieces`);
     
     for(let i = 0; i < spawnCount; i++) {
       let posIndex = Math.floor(Math.random() * availablePositions.length);
@@ -693,7 +707,11 @@
         lifetime: lifetime,
         color: getBonusColor(multiplier)
       });
+      
+      console.log(`Bonus piece spawned: x${multiplier} at (${pos.r}, ${pos.c}) with ${lifetime} turns lifetime`);
     }
+    
+    console.log(`Total bonus pieces after spawn: ${bonusPieces.length}`);
   }
   
   function getBonusColor(multiplier) {
@@ -766,6 +784,7 @@
     for(let r=0;r<BOARD_SIZE;r++){ 
       let full=true; 
       for(let c=0;c<BOARD_SIZE;c++){ 
+        // A line is full if it has pieces OR durable pieces OR bonus pieces
         if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
       } 
       if(full) clearedRows.push(r); 
@@ -773,6 +792,7 @@
     for(let c=0;c<BOARD_SIZE;c++){ 
       let full=true; 
       for(let r=0;r<BOARD_SIZE;r++){ 
+        // A line is full if it has pieces OR durable pieces OR bonus pieces
         if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
       } 
       if(full) clearedCols.push(c); 
@@ -789,15 +809,18 @@
       else if(crossSize >= 6) crossBonus = 999;  // 2x3 or 3x2+ cross: clear all!
     }
     
-    // Calculate bonus multipliers for cleared lines
+    // Calculate bonus multipliers for cleared lines BEFORE clearing
     let totalBonusMultiplier = 1;
     let clearedBonusPieces = [];
+    
+    console.log(`Checking for bonus pieces in ${clearedRows.length} rows and ${clearedCols.length} columns`);
     
     // Check rows for bonus pieces
     for(let rr of clearedRows) {
       for(let c = 0; c < BOARD_SIZE; c++) {
         let bonusPiece = getBonusPiece(rr, c);
         if(bonusPiece) {
+          console.log(`Found bonus piece x${bonusPiece.multiplier} in cleared row ${rr} at column ${c}`);
           totalBonusMultiplier *= bonusPiece.multiplier;
           clearedBonusPieces.push(bonusPiece);
         }
@@ -809,11 +832,14 @@
       for(let r = 0; r < BOARD_SIZE; r++) {
         let bonusPiece = getBonusPiece(r, cc);
         if(bonusPiece) {
+          console.log(`Found bonus piece x${bonusPiece.multiplier} in cleared column ${cc} at row ${r}`);
           totalBonusMultiplier *= bonusPiece.multiplier;
           clearedBonusPieces.push(bonusPiece);
         }
       }
     }
+    
+    console.log(`Total bonus multiplier: ${totalBonusMultiplier}, Cleared ${clearedBonusPieces.length} bonus pieces`);
     
     // Clear rows and columns, including durable pieces and bonus pieces
     // Track which pieces have been affected by cross bonus to avoid double-counting
@@ -863,15 +889,18 @@
     // Remove pieces with 0 durability
     durablePieces = durablePieces.filter(piece => piece.durability > 0);
     
-    // Remove cleared bonus pieces
+    // Generate new bonus pieces after line clear (BEFORE removing cleared ones)
+    if(clearedRows.length > 0 || clearedCols.length > 0) {
+      console.log(`Line clear detected: ${clearedRows.length} rows, ${clearedCols.length} cols`);
+      console.log(`Bonus pieces before spawn: ${bonusPieces.length}`);
+      generateBonusPieces();
+      console.log(`Bonus pieces after spawn: ${bonusPieces.length}`);
+    }
+    
+    // Remove cleared bonus pieces from the bonusPieces array (AFTER spawning new ones)
     bonusPieces = bonusPieces.filter(piece => 
       !clearedBonusPieces.some(cleared => cleared.r === piece.r && cleared.c === piece.c)
     );
-    
-    // Generate new bonus pieces after line clear
-    if(clearedRows.length > 0 || clearedCols.length > 0) {
-      generateBonusPieces();
-    }
     
     return {
       rows: clearedRows, 
@@ -959,8 +988,17 @@
   }
 
   function decreaseBonusLifetimes() {
-    bonusPieces.forEach(piece => piece.lifetime--);
+    console.log(`Decreasing bonus lifetimes. Before: ${bonusPieces.length} pieces`);
+    bonusPieces.forEach(piece => {
+      piece.lifetime--;
+      console.log(`Bonus piece x${piece.multiplier} at (${piece.r}, ${piece.c}) lifetime: ${piece.lifetime + 1} -> ${piece.lifetime}`);
+    });
+    let beforeCount = bonusPieces.length;
     bonusPieces = bonusPieces.filter(piece => piece.lifetime > 0);
+    let afterCount = bonusPieces.length;
+    if(beforeCount !== afterCount) {
+      console.log(`Removed ${beforeCount - afterCount} expired bonus pieces. Remaining: ${afterCount}`);
+    }
   }
   
   // Input mapping
@@ -1149,6 +1187,11 @@
   });
 
   function drawBoard(){
+    // Debug: Log bonus pieces state
+    if(bonusPieces.length > 0) {
+      console.log(`Drawing ${bonusPieces.length} bonus pieces:`, bonusPieces);
+    }
+    
     // grid
     for(let r=0;r<BOARD_SIZE;r++){
       for(let c=0;c<BOARD_SIZE;c++){
@@ -1176,6 +1219,8 @@
           // Draw bonus piece with multiplier
           let piece = getBonusPiece(r, c);
           let multiplier = piece.multiplier;
+          
+          console.log(`Drawing bonus piece x${multiplier} at (${r}, ${c}) with color ${piece.color}`);
           
           ctx.fillStyle = piece.color;
           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);

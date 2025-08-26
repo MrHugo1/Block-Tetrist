@@ -1,134 +1,137 @@
-# Changelog
+# Block Tetrist - Changelog
 
-## [v1.5.0] - 2024-12-19
-
-### ✨ New Features
-- **Durable Pieces System**: Replaced blocked cells with pieces that have durability (2-5 hits)
-- **Cross Clear Bonus**: Special durability reduction when clearing both rows and columns simultaneously
-  - 1x1 cross: -3 durability
-  - 2x1 or 1x2 cross: -4 durability  
-  - 2x2 cross: -6 durability
-  - 2x3 or 3x2+ cross: Clear ALL durable pieces on board
-- **Enhanced Visual Feedback**: Durable pieces show durability numbers with color intensity
-
-### 🛠️ Bug Fixes
-- **Cross Clear Logic**: Fixed double-counting of cross bonus on durable pieces
-- **Game Over Logic**: Fixed premature game over when lines could be cleared
-- **Line Clearing Order**: Ensure lines are cleared BEFORE checking game over conditions
-- **Pool Refill**: Fixed pool not refilling after implementing durable pieces system
-
-### 🎮 Gameplay Improvements
-- **Strategic Depth**: Players must plan multiple hits on durable pieces
-- **Cross Clear Strategy**: Encourages creating simultaneous row/column clears
-- **Visual Clarity**: Durability numbers make piece strength immediately apparent
+## [v1.6.2] - 2024-12-19
+### 🐛 Bug Fixes
+- **Fixed Bonus System Spawn Logic**: Bonus pieces now spawn on existing pieces instead of empty cells
+- **Fixed Bonus Piece Removal Timing**: Bonus pieces are now spawned before removing cleared ones
+- **Fixed Line Clear Logic**: Bonus pieces are now properly counted as part of lines for clearing
+- **Restored 30% Spawn Chance**: Changed from 100% test spawn back to intended 30% chance
+- **Added Comprehensive Debug Logging**: Added console.log statements to track bonus system behavior
 
 ### 🔧 Technical Improvements
-- **State Management**: Refactored from `blockedCells` to `durablePieces` system
-- **Performance**: Optimized cross clear detection and durability calculations
-- **Code Quality**: Improved logic flow for line clearing and game over detection
+- **Improved Bonus Spawn Algorithm**: Now correctly finds positions on existing pieces for bonus placement
+- **Enhanced Debug Information**: Added detailed logging for bonus piece creation, removal, and rendering
+- **Fixed Lifetime Management**: Bonus pieces now properly decrease lifetime and get removed when expired
+
+### 📝 Documentation
+- **Updated Version Number**: From v1.6.1 to v1.6.2
+- **Enhanced Test Suite**: Created comprehensive test file (test.html) for bonus system validation
 
 ---
 
-## [v1.4.3] - 2024-12-19
-
-### ✨ New Features
-- **Consecutive Combo System**: Changed from lines cleared per turn to consecutive streak tracking
-- **Enhanced Combo Text**: 10-level combo system with escalating feedback
-  - 1st: "Good", 2nd: "Nice!", 3rd: "Great!", 4th: "Amazing!", 5th: "Fantastic!"
-  - 6th: "Incredible!", 7th: "Unbelievable!", 8th: "Legendary!", 9th: "Godlike!", 10th+: "Ultimate!"
-
-### 🛠️ Bug Fixes
-- **Combo Reset**: Streak resets to 0 when no lines are cleared
-- **Game Over Logic**: Refined conditions for detecting unplaceable pieces vs. empty pool
+## [v1.6.1] - 2024-12-19
+### 🐛 Bug Fixes
+- **Fixed Bonus System Spawn Logic**: Corrected logic to spawn bonus pieces on empty cells after line clear
+- **Added Debug Logging**: Added console.log statements to troubleshoot bonus spawning issues
+- **Temporary 100% Spawn Rate**: Set spawn chance to 100% for testing purposes
 
 ---
 
-## [v1.4.2] - 2024-12-19
-
+## [v1.6.0] - 2024-12-19
 ### ✨ New Features
-- **Enhanced Combo Text System**: Dynamic text feedback for clearing multiple lines
-- **Animated Combo Display**: Fade-out animation for combo text with scaling effects
-- **Improved Game Over UI**: Replaced full-screen overlay with subtle on-board notification
+- **Bonus Points System**: Added bonus pieces with multipliers (x2, x3, x4, x5, x6, x7)
+- **Dynamic Spawn System**: 30% chance to spawn 2-3 bonus pieces after line clear
+- **Lifetime Management**: Bonus pieces automatically disappear after 2-4 turns based on multiplier
+- **Multiplier Stacking**: Multiple bonus pieces in same line multiply together (x2 × x5 = x10)
+- **Visual Feedback**: Bonus score text displays "+X points" for 2 seconds after clearing
 
-### 🛠️ Bug Fixes
-- **Game Over Detection**: Fixed logic to properly distinguish between empty pool and unplaceable pieces
-- **Auto-refill System**: Re-enabled automatic pool refilling when empty
-- **UI Responsiveness**: Improved game over button placement and styling
+### 🎨 Visual Enhancements
+- **Color-Coded Bonus Pieces**: Green (x2-3), Yellow (x4-5), Red (x6-7)
+- **Multiplier Display**: Shows "x2", "x3", etc. on bonus pieces
+- **Lifetime Counter**: Displays remaining turns on each bonus piece
+- **Bonus Score Animation**: Floating text shows bonus points earned
+
+### 🎯 Gameplay Mechanics
+- **Strategic Placement**: Bonus pieces appear on existing pieces, not empty cells
+- **Maximum Limit**: Maximum 4 bonus pieces on board at any time
+- **Scoring Integration**: Bonus multipliers apply to all points in cleared lines
+- **Auto-Cleanup**: Expired bonus pieces automatically removed from board
 
 ---
 
-## [v1.4.1] - 2024-12-19
-
+## [v1.5.0] - 2024-12-19
 ### ✨ New Features
-- **Game Over Refinement**: Added "Chơi Lại" (Play Again) button below game information
-- **Improved Game Over Logic**: Better detection of when game should end vs. continue
+- **Durable Pieces System**: Added pieces with durability that require multiple clears
+- **Cross Clear Bonus**: Special bonus for clearing both rows and columns simultaneously
+- **Enhanced Combo System**: Added combo streak counter with escalating text feedback
+- **Game Over Detection**: Improved game over logic with victory condition
 
-### 🛠️ Bug Fixes
-- **Game Over Conditions**: Fixed premature game over when board still has empty cells
-- **Pool Management**: Improved handling of empty pool scenarios
+### 🎨 Visual Enhancements
+- **Durability Display**: Shows remaining durability on durable pieces
+- **Combo Text Animation**: "Good", "Nice", "Great", "Amazing", etc. with animations
+- **Cross Clear Feedback**: Special text for cross clear achievements
+- **High Score Indicator**: Visual indicator when achieving new high score
+
+### 🎯 Gameplay Mechanics
+- **Durability System**: Pieces with 2-5 durability require multiple line clears
+- **Cross Clear Mechanics**: Simultaneous row/column clear provides durability reduction bonus
+- **Combo Streak**: Consecutive line clears build combo multiplier
+- **Strategic Depth**: Players must manage durable pieces strategically
 
 ---
 
 ## [v1.4.0] - 2024-12-19
-
 ### ✨ New Features
-- **32 Unique Pieces**: Expanded from 12 base pieces to 32 with various rotation states
-- **Enhanced Rotation System**: 4-direction rotation for L3, L4, T4 pieces
-- **Improved Piece Variety**: Added rotated versions of existing pieces for more strategic options
+- **32 Piece Types**: Added all rotations for L3, L4, T4 pieces
+- **Enhanced Pool System**: Improved pool refill logic with rescue pieces
+- **Hold System**: Added ability to hold one piece (3-turn cooldown)
+- **Swap System**: Emergency piece swapping with 9-turn cooldown
 
-### 🎮 Gameplay Improvements
-- **Strategic Depth**: More piece options increase planning complexity
-- **Visual Variety**: Different rotation states provide visual distinction
-
----
-
-## [v1.3.0] - 2024-12-19
-
-### ✨ New Features
-- **Hold System**: Save selected piece for later use (3-turn cooldown)
-- **Swap System**: Emergency piece replacement with rescue pieces (9-turn cooldown)
-- **Rescue Piece Set**: Special pieces available for swap when pool becomes unplayable
-
-### 🎮 Gameplay Improvements
-- **Strategic Planning**: Hold system allows better piece management
-- **Emergency Recovery**: Swap system prevents impossible game states
+### 🎯 Gameplay Mechanics
+- **Piece Rotation**: Full 4-direction rotation support for L and T pieces
+- **Strategic Depth**: Hold and swap mechanics add tactical options
+- **Rescue System**: Automatic rescue pieces when pool becomes unplayable
 - **Cooldown Management**: Strategic timing of hold and swap abilities
 
 ---
 
-## [v1.2.0] - 2024-12-19
-
+## [v1.3.0] - 2024-12-19
 ### ✨ New Features
-- **Blocked Cells System**: Randomly generated obstacles that cannot be placed upon
-- **Strategic Obstacles**: Blocked cells add complexity and require planning to clear
-- **Fill Rate Management**: Intelligent piece generation based on board state
+- **Enhanced Scoring**: Added precision bonuses for clearing multiple lines
+- **Combo System**: Chain multiplier increases with consecutive line clears
+- **Fill Rate Management**: Strategic depth through fill rate optimization
+- **High Score Persistence**: Local storage for high score tracking
 
-### 🎮 Gameplay Improvements
-- **Strategic Depth**: Players must work around obstacles
-- **Risk Management**: Balancing piece placement with obstacle clearing
+### 🎯 Gameplay Mechanics
+- **Precision Bonuses**: 1.2× for 2 lines, 1.5× for 3+ lines
+- **Chain Multipliers**: Up to 1.5× multiplier for consecutive clears
+- **Strategic Placement**: Balance between immediate points and board management
+
+---
+
+## [v1.2.0] - 2024-12-19
+### ✨ New Features
+- **Piece Pool System**: 3-piece pool for strategic piece selection
+- **Enhanced UI**: Improved visual design with gradients and animations
+- **Responsive Design**: Mobile-friendly interface adaptations
+- **Game Statistics**: Real-time display of score, turns, and fill rate
+
+### 🎨 Visual Enhancements
+- **Modern UI Design**: Gradient backgrounds and smooth transitions
+- **Piece Visualization**: Clear piece representation with colors
+- **Interactive Elements**: Hover effects and visual feedback
+- **Mobile Optimization**: Responsive layout for various screen sizes
 
 ---
 
 ## [v1.1.0] - 2024-12-19
-
 ### ✨ New Features
-- **Pool System**: 3-piece selection pool for upcoming moves
-- **Basic Scoring**: Points for placed pieces and cleared lines
-- **Combo System**: Multiplier system for consecutive successful moves
-- **Fill Rate Display**: Visual indicator of board completion percentage
+- **Basic Game Mechanics**: Core piece placement and line clearing
+- **8×8 Board**: Compact playing field for strategic gameplay
+- **Multiple Piece Types**: Various piece shapes and sizes
+- **Basic Scoring**: Points for piece placement and line clearing
 
-### 🎮 Gameplay Improvements
-- **Strategic Planning**: Players can see upcoming pieces
-- **Score Tracking**: Clear feedback on performance
-- **Visual Feedback**: Immediate response to player actions
+### 🎯 Core Gameplay
+- **Piece Placement**: Click to place selected pieces on board
+- **Line Clearing**: Complete rows/columns to clear them
+- **Score Accumulation**: Earn points through strategic play
+- **Game Over Detection**: End game when no more moves possible
 
 ---
 
 ## [v1.0.0] - 2024-12-19
-
-### ✨ Initial Release
-- **8×8 Game Board**: Classic grid-based puzzle gameplay
-- **Basic Piece Placement**: Click-based piece placement system
-- **Line Clearing**: Complete rows and columns to clear them
-- **Responsive Design**: Modern UI with smooth animations
-- **Local Storage**: High score persistence
+### 🎉 Initial Release
+- **Block Tetrist**: Strategic puzzle game with 8×8 board
+- **Core Mechanics**: Place pieces to create complete lines
+- **Basic UI**: Functional game interface with canvas rendering
+- **Foundation**: Established codebase for future enhancements

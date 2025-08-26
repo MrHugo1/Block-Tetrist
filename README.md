@@ -1,154 +1,143 @@
-# Block Tetrist 🎮
+# 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Game Đặt Khối Thông Minh - Bàn 8×8** | Version: **v1.5.0**
+**Phiên bản:** v1.6.2  
+**Ngày cập nhật:** 19/12/2024
 
-Một trò chơi puzzle thông minh kết hợp giữa Tetris và Block Puzzle, với hệ thống chiến thuật sâu sắc và giao diện hiện đại.
+Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
 
-## ✨ **Tính Năng Chính**
+## ✨ Tính Năng Mới Nhất (v1.6.2)
 
-### 🎯 **Core Gameplay**
-- **Bàn chơi 8×8**: Grid-based puzzle với 64 ô
-- **32 Unique Pieces**: 12 loại cơ bản + 20 hướng xoay khác nhau
-- **Pool System**: 3 pieces sẵn sàng để chọn
-- **Hold System**: Lưu 1 piece để sử dụng sau (CD 3 lượt)
-- **Swap System**: Thay thế piece khẩn cấp (CD 9 lượt)
+### 🎁 Hệ Thống Bonus Points
+- **Ô Bonus x2-x7**: Xuất hiện sau khi clear line (30% chance)
+- **Nhân Điểm Thông Minh**: Clear line chứa ô bonus → nhân điểm tương ứng
+- **Nhân Dồn**: Nhiều ô bonus cùng lúc → nhân dồn (x2 × x5 = x10)
+- **Tự Động Biến Mất**: Ô bonus tồn tại 2-4 lượt tùy theo hệ số nhân
 
-### 🚀 **Durable Pieces System (v1.5.0)**
-- **Pieces có độ bền**: Thay thế ô bị khóa với pieces có durability 2-5 hits
-- **Cross Clear Bonus**: Giảm durability đặc biệt khi clear cả hàng và cột
-  - **1x1 cross**: -3 durability
-  - **2x1 hoặc 1x2 cross**: -4 durability  
-  - **2x2 cross**: -6 durability
-  - **2x3 hoặc 3x2+ cross**: Clear TẤT CẢ durable pieces!
-- **Visual Feedback**: Hiển thị số durability với màu sắc thay đổi
+### 🔧 Sửa Lỗi Quan Trọng
+- **Sửa Logic Spawn**: Bonus pieces giờ spawn trên pieces có sẵn, không phải ô trống
+- **Sửa Thứ Tự Xử Lý**: Spawn bonus mới trước khi xóa bonus cũ
+- **Sửa Logic Clear Line**: Bonus pieces được tính đúng trong việc clear line
+- **Thêm Debug Logging**: Console.log chi tiết để track hoạt động của bonus system
 
-### 🎮 **Advanced Systems**
-- **Combo Streak**: Hệ thống combo liên tiếp (Good → Nice! → Great! → ... → Ultimate!)
-- **Strategic Obstacles**: Durable pieces tạo thách thức chiến thuật
-- **Fill Rate Management**: Tự động điều chỉnh độ khó dựa trên board state
-- **Rescue System**: Tự động sửa khi pool không thể đặt được
+## 🎯 Tính Năng Chính
 
-## 🎯 **Cách Chơi**
+### 🧩 Hệ Thống Khối
+- **32 Loại Khối**: Bao gồm tất cả hướng xoay (0°, 90°, 180°, 270°)
+- **Pool 3 Khối**: Chọn khối từ 3 khối có sẵn
+- **Hold System**: Lưu 1 khối (CD 3 lượt)
+- **Swap System**: Đổi khối cứu nạn (CD 9 lượt)
 
-### 📱 **Điều Khiển**
-- **Chuột trái**: Chọn piece từ pool, đặt lên board
-- **Chuột phải**: Bỏ chọn piece
-- **Phím H**: Hold piece đang chọn
-- **Phím 1/2/3**: Swap piece ở slot tương ứng
+### 🏆 Hệ Thống Điểm
+- **Chain Multiplier**: Clear liên tiếp tăng multiplier (≤1.5×)
+- **Precision Bonus**: Clear ≥2 line nhân điểm (1.2× / 1.5×)
+- **Combo System**: Tích lũy theo thời gian
+- **Bonus Multiplier**: Ô x2-x7 nhân điểm khi clear line
 
-### 🎲 **Mục Tiêu**
-1. **Đặt pieces** để tạo hàng/cột hoàn chỉnh
-2. **Clear lines** để tăng điểm và tạo khoảng trống
-3. **Quản lý durable pieces** - cần nhiều lần hit để clear
-4. **Tạo cross clears** để nhận bonus durability reduction
-5. **Duy trì combo streak** để tăng điểm tối đa
+### 🎨 Giao Diện
+- **Thiết Kế Hiện Đại**: Gradient, animation mượt mà
+- **Responsive**: Tối ưu cho mọi kích thước màn hình
+- **Visual Feedback**: Text animation, combo display
+- **Debug Panel**: Thông tin chi tiết về game state
 
-### 🏆 **Hệ Thống Điểm**
-- **Base Score**: 1 điểm cho mỗi ô đặt
-- **Line Bonus**: 10 điểm cho mỗi line clear
-- **Precision Bonus**: 1.2× cho 2 lines, 1.5× cho 3+ lines
-- **Combo Multiplier**: Tối đa 1.5× cho combo liên tiếp
-- **Cross Clear Bonus**: Điểm thưởng đặc biệt cho cross clears
+## 🎮 Cách Chơi
 
-## 🔧 **Technical Features**
+### 📱 Điều Khiển
+- **Chuột trái**: Chọn khối từ pool, click đặt lên bàn
+- **Chuột phải**: Bỏ chọn khối
+- **Phím H**: Hold khối đang chọn
+- **Phím 1/2/3**: Swap khối slot tương ứng
 
-### 🎨 **UI/UX**
-- **Responsive Design**: Tối ưu cho mọi kích thước màn hình
-- **Smooth Animations**: Hiệu ứng mượt mà cho combo text và transitions
-- **Modern Styling**: Gradient colors, shadows, và visual feedback
-- **Accessibility**: High contrast và clear visual indicators
+### 🎯 Mục Tiêu
+- Đặt khối để tạo thành hàng/cột hoàn chỉnh
+- Clear càng nhiều line càng tốt
+- Duy trì combo để tăng điểm
+- Quản lý Fill Rate thông minh
+- Clear các ô có độ bền (màu đỏ) để tăng điểm
+- Tận dụng ô bonus để nhân điểm
 
-### 💾 **Performance**
-- **Canvas Rendering**: Smooth 60fps gameplay
-- **Efficient Algorithms**: Optimized line clearing và game over detection
-- **Memory Management**: Smart piece pooling và cleanup
-- **Local Storage**: Lưu high score và game state
+## 🔧 Cài Đặt & Chạy
 
-### 🧠 **AI & Logic**
-- **Intelligent Pool Generation**: Bias system cho rescue pieces
-- **Guardrail System**: Tự động sửa impossible game states
-- **Strategic Piece Distribution**: Balanced piece weights cho gameplay fair
-- **Adaptive Difficulty**: Điều chỉnh độ khó dựa trên player performance
+### 📋 Yêu Cầu
+- Trình duyệt web hiện đại (Chrome, Firefox, Safari, Edge)
+- Hỗ trợ HTML5 Canvas
+- JavaScript enabled
 
-## 🚀 **Installation & Setup**
+### 🚀 Chạy Game
+1. Tải file `index.html`
+2. Mở bằng trình duyệt web
+3. Bắt đầu chơi ngay lập tức!
 
-### 📥 **Quick Start**
-1. **Clone repository** hoặc download source code
-2. **Mở `index.html`** trong browser hiện đại
-3. **Bắt đầu chơi** ngay lập tức!
+### 🧪 Test Bonus System
+- Mở file `test.html` để kiểm tra hệ thống bonus
+- Chạy comprehensive test suite
+- Xem console.log để debug
 
-### 🌐 **Browser Support**
-- **Chrome/Edge**: ✅ Full support
-- **Firefox**: ✅ Full support  
-- **Safari**: ✅ Full support
-- **Mobile**: ✅ Responsive design
+## 📊 Thống Kê Game
 
-### 📱 **Mobile Experience**
-- **Touch Controls**: Tối ưu cho màn hình cảm ứng
-- **Responsive Layout**: Tự động điều chỉnh cho mobile
-- **Performance**: Smooth gameplay trên mobile devices
+### 📈 Scoring System
+- **Đặt khối**: 1 điểm/ô
+- **Clear line**: 10 điểm/line
+- **Precision bonus**: 1.2× (2 lines), 1.5× (3+ lines)
+- **Chain multiplier**: Tối đa 1.5×
+- **Bonus multiplier**: x2 đến x7 (nhân dồn)
 
-## 🎮 **Game Modes & Features**
+### 🎲 Game Mechanics
+- **Bàn chơi**: 8×8 ô
+- **Khối tối đa**: 32 loại với 4 hướng xoay
+- **Pool size**: 3 khối
+- **Bonus pieces**: Tối đa 4 ô trên bàn
+- **Durable pieces**: 6-12 ô với độ bền 2-5
 
-### 🏁 **Classic Mode**
-- **Endless Gameplay**: Chơi cho đến khi không thể đặt piece
-- **Score Tracking**: Theo dõi điểm số và high score
-- **Progressive Difficulty**: Độ khó tăng dần theo thời gian
+## 🐛 Báo Cáo Lỗi & Đóng Góp
 
-### 🎯 **Strategic Elements**
-- **Durable Pieces Management**: Lập kế hoạch nhiều lượt để clear
-- **Cross Clear Planning**: Tạo chiến thuật để nhận bonus
-- **Resource Management**: Sử dụng hold và swap một cách thông minh
+### 📝 Báo Cáo Lỗi
+Nếu gặp vấn đề, vui lòng:
+1. Kiểm tra console log để xem debug info
+2. Ghi lại các bước để tái hiện lỗi
+3. Mô tả chi tiết vấn đề gặp phải
 
-## 🔮 **Roadmap & Future Features**
+### 🔧 Đóng Góp Code
+Để đóng góp:
+1. Fork repository
+2. Tạo feature branch
+3. Commit changes với message rõ ràng
+4. Tạo Pull Request
 
-### 🚧 **Planned Updates**
-- **Multiple Game Modes**: Time attack, puzzle mode, challenge mode
-- **Power-ups System**: Special abilities và temporary bonuses
-- **Achievement System**: Unlockable rewards và milestones
-- **Multiplayer Support**: Competitive và cooperative modes
+## 📜 Lịch Sử Phiên Bản
 
-### 💡 **Community Suggestions**
-- **Custom Themes**: Player-created visual themes
-- **Level Editor**: Create và share custom levels
-- **Statistics Dashboard**: Detailed performance analytics
-- **Social Features**: Leaderboards và friend challenges
+### v1.6.2 (19/12/2024)
+- 🐛 Sửa toàn bộ hệ thống bonus points
+- 🔧 Cải thiện logic spawn và xử lý bonus
+- 📝 Thêm comprehensive debug logging
+- 🧪 Tạo test suite cho bonus system
 
-## 🤝 **Contributing**
+### v1.6.1 (19/12/2024)
+- 🐛 Sửa logic spawn bonus pieces
+- 🔧 Thêm debug logging
+- 📊 Tạm thời set spawn chance = 100%
 
-### 🐛 **Bug Reports**
-- **GitHub Issues**: Report bugs và suggest improvements
-- **Detailed Descriptions**: Include steps to reproduce
-- **System Information**: Browser, OS, và device details
+### v1.6.0 (19/12/2024)
+- ✨ Thêm hệ thống bonus points hoàn chỉnh
+- 🎨 Color coding cho bonus pieces
+- 🎯 Lifetime management system
+- 📊 Multiplier stacking mechanics
 
-### 💻 **Code Contributions**
-- **Fork & Pull Request**: Standard GitHub workflow
-- **Code Style**: Follow existing conventions
-- **Testing**: Ensure changes work across browsers
+### v1.5.0 (19/12/2024)
+- ✨ Hệ thống durable pieces
+- 🎯 Cross clear bonus mechanics
+- 🏆 Enhanced combo system
+- 🎮 Improved game over logic
 
-### 📚 **Documentation**
-- **README Updates**: Improve clarity và completeness
-- **Code Comments**: Add helpful explanations
-- **User Guides**: Create tutorials và tips
+Xem [CHANGELOG.md](CHANGELOG.md) để biết chi tiết đầy đủ.
 
-## 📄 **License**
+## 📄 Giấy Phép
 
-**MIT License** - Xem file `LICENSE` để biết chi tiết.
+Dự án này được phát hành dưới giấy phép MIT. Xem file LICENSE để biết thêm chi tiết.
 
-## 🙏 **Acknowledgments**
+## 🙏 Lời Cảm Ơn
 
-- **Inspiration**: Classic Tetris và modern puzzle games
-- **Community**: Feedback và suggestions từ players
-- **Open Source**: Libraries và tools sử dụng trong development
+Cảm ơn tất cả những ai đã đóng góp ý tưởng và phản hồi để cải thiện game!
 
 ---
 
-**🎮 Chơi ngay tại: `index.html`**
-
-**📧 Contact**: GitHub Issues hoặc Discussions
-
-**⭐ Star**: Nếu bạn thích game này!
-
----
-
-*Last Updated: December 19, 2024 | Version: v1.5.0*
+**🎮 Chúc bạn chơi game vui vẻ và đạt điểm cao! 🏆**

@@ -304,7 +304,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.4.3</div>
+     <div class="version">v1.5.0</div>
   <div class="debug" id="debug"></div>
   
   <div class="header">
@@ -345,7 +345,7 @@
       <p><b>Chọn khối</b> từ pool bên dưới, sau đó <b>click lên ô</b> trên bàn để đặt. <span class="hl">Chuột phải</span> để bỏ chọn.</p>
       <p><span class="hl">Hold (H)</span>: Lưu 1 khối (CD 3 lượt)</p>
       <p><span class="hl">Swap (1/2/3)</span>: Đổi khối sang khối cứu nạn (CD 9 lượt)</p>
-      <p><span class="hl">Ô đỏ</span>: Ô bị khóa, chỉ clear được khi xếp đủ hàng/cột</p>
+             <p><span class="hl">Ô đỏ có số</span>: Piece có độ bền, cần xóa đủ số lần để biến mất</p>
     </div>
     
     <div class="card legend">
@@ -375,7 +375,7 @@
       <p>Clear càng nhiều line càng tốt</p>
       <p>Duy trì combo để tăng điểm</p>
       <p>Quản lý Fill Rate thông minh</p>
-      <p>Clear các ô bị khóa (màu đỏ) để tăng điểm</p>
+             <p>Clear các ô có độ bền (màu đỏ) để tăng điểm</p>
     </div>
   </div>
 </div>
@@ -421,7 +421,7 @@
   let turn = 0;
   let highScore = localStorage.getItem('blockTetristHighScore') || 0;
   let gameOver = false;
-  let blockedCells = [];
+  let durablePieces = []; // Pieces with durability instead of blocked cells
   let comboTexts = [];
   let comboStreak = 0; // Combo streak counter for consecutive line clears
 
@@ -493,7 +493,7 @@
     let hasEmptyCells = false;
     for(let r = 0; r < BOARD_SIZE; r++) {
       for(let c = 0; c < BOARD_SIZE; c++) {
-        if(!grid[r][c] && !isBlockedCell(r, c)) {
+        if(!grid[r][c] && !isDurablePiece(r, c)) {
           hasEmptyCells = true;
           break;
         }
@@ -534,7 +534,7 @@
     gameOver = false;
     comboTexts = [];
     comboStreak = 0;
-    generateBlockedCells();
+    generateDurablePieces();
     refillPool();
     render();
   }
@@ -602,31 +602,43 @@
 
   function getFillRate(){
     let filled=0;
-    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isBlockedCell(r,c)) filled++;
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isDurablePiece(r,c)) filled++;
     return filled/(BOARD_SIZE*BOARD_SIZE);
   }
   
-  function isBlockedCell(r, c) {
-    return blockedCells.some(cell => cell.r === r && cell.c === c);
+  function isDurablePiece(r, c) {
+    return durablePieces.some(piece => piece.r === r && piece.c === c);
   }
   
-  function generateBlockedCells() {
-    let count = Math.floor(Math.random() * 7) + 6; // 6-12 cells
-    blockedCells = [];
+  function getDurablePiece(r, c) {
+    return durablePieces.find(piece => piece.r === r && piece.c === c);
+  }
+  
+  function generateDurablePieces() {
+    let count = Math.floor(Math.random() * 7) + 6; // 6-12 pieces
+    durablePieces = [];
     for(let i = 0; i < count; i++) {
       let r, c;
       do {
         r = Math.floor(Math.random() * BOARD_SIZE);
         c = Math.floor(Math.random() * BOARD_SIZE);
-      } while(isBlockedCell(r, c) || (r === 0 && c === 0)); // Avoid top-left corner
-      blockedCells.push({r, c});
+      } while(isDurablePiece(r, c) || (r === 0 && c === 0)); // Avoid top-left corner
+      
+      // Random durability 2-5
+      let durability = Math.floor(Math.random() * 4) + 2;
+      durablePieces.push({
+        r: r, 
+        c: c, 
+        durability: durability,
+        color: "#ff6b6b"
+      });
     }
   }
   function canPlace(piece, R, C){
     for(const cell of piece.cells){
       let rr=R+cell.r, cc=C+cell.c;
       if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
-      if(grid[rr][cc] || isBlockedCell(rr, cc)) return false;
+      if(grid[rr][cc] || isDurablePiece(rr, cc)) return false;
     }
     return true;
   }
@@ -644,34 +656,78 @@
     for(let r=0;r<BOARD_SIZE;r++){ 
       let full=true; 
       for(let c=0;c<BOARD_SIZE;c++){ 
-        if(!grid[r][c] && !isBlockedCell(r,c)){full=false;break;} 
+        if(!grid[r][c] && !isDurablePiece(r,c)){full=false;break;} 
       } 
       if(full) clearedRows.push(r); 
     }
     for(let c=0;c<BOARD_SIZE;c++){ 
       let full=true; 
       for(let r=0;r<BOARD_SIZE;r++){ 
-        if(!grid[r][c] && !isBlockedCell(r,c)){full=false;break;} 
+        if(!grid[r][c] && !isDurablePiece(r,c)){full=false;break;} 
       } 
       if(full) clearedCols.push(c); 
     }
     
-    // Clear rows and columns, including blocked cells
-    for(let rr of clearedRows){ 
-      for(let c=0;c<BOARD_SIZE;c++) { 
-        grid[rr][c]=0; 
-        // Remove blocked cells in cleared rows
-        blockedCells = blockedCells.filter(cell => !(cell.r === rr && cell.c === c));
-      } 
+    // Check for cross clear bonus
+    let crossBonus = 0;
+    if(clearedRows.length > 0 && clearedCols.length > 0) {
+      // Cross clear detected!
+      let crossSize = clearedRows.length * clearedCols.length;
+      if(crossSize === 1) crossBonus = 3;        // 1x1 cross: -3 durability
+      else if(crossSize === 2) crossBonus = 4;   // 2x1 or 1x2 cross: -4 durability
+      else if(crossSize === 4) crossBonus = 6;   // 2x2 cross: -6 durability
+      else if(crossSize >= 6) crossBonus = 999;  // 2x3 or 3x2+ cross: clear all!
     }
-    for(let cc of clearedCols){ 
-      for(let r=0;r<BOARD_SIZE;r++) { 
-        grid[r][cc]=0; 
-        // Remove blocked cells in cleared columns
-        blockedCells = blockedCells.filter(cell => !(cell.r === r && cell.c === cc));
-      } 
-    }
-    return {rows:clearedRows, cols:clearedCols};
+    
+         // Clear rows and columns, including durable pieces
+     // Track which pieces have been affected by cross bonus to avoid double-counting
+     let affectedPieces = new Set();
+     
+     for(let rr of clearedRows){ 
+       for(let c=0;c<BOARD_SIZE;c++) { 
+         grid[rr][c]=0; 
+         // Reduce durability of durable pieces in cleared rows
+         let piece = getDurablePiece(rr, c);
+         if(piece) {
+           if(crossBonus >= 999) {
+             piece.durability = 0; // Clear all for large cross
+           } else {
+             // For cross clear, only apply bonus once per piece
+             if(affectedPieces.has(piece)) {
+               piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
+             } else {
+               piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
+               affectedPieces.add(piece);
+             }
+           }
+         }
+       } 
+     }
+     for(let cc of clearedCols){ 
+       for(let r=0;r<BOARD_SIZE;r++) { 
+         grid[r][cc]=0; 
+         // Reduce durability of durable pieces in cleared columns
+         let piece = getDurablePiece(r, cc);
+         if(piece) {
+           if(crossBonus >= 999) {
+             piece.durability = 0; // Clear all for large cross
+           } else {
+             // For cross clear, only apply bonus once per piece
+             if(affectedPieces.has(piece)) {
+               piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
+             } else {
+               piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
+               affectedPieces.add(piece);
+             }
+           }
+         }
+       } 
+     }
+    
+    // Remove pieces with 0 durability
+    durablePieces = durablePieces.filter(piece => piece.durability > 0);
+    
+    return {rows:clearedRows, cols:clearedCols, crossBonus: crossBonus};
   }
 
   function getBiasFactor(FR){
@@ -789,64 +845,79 @@
       if(g){
         let piece = pool[selected.index];
         if(canPlace(piece, g.r, g.c)){
-          let placedCells = placePiece(piece, g.r, g.c);
-          let cleared = clearLines();
-          // scoring
-          const lines = cleared.rows.length + cleared.cols.length;
-          score += placedCells*scoring.cell + lines*scoring.line;
-          if(lines>=3) score = Math.floor(score*scoring.precisionThree);
-          else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
-          // combo
-          if(lines>0) comboLevel = Math.min(comboLevel+1, scoring.comboSteps.length-1);
-          else comboLevel = 0;
-          score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
-          
-          // Add combo text based on consecutive streak (v1.4.3)
-          if(lines > 0) {
-            comboStreak++; // Increment streak for each line clear
-            let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
-            let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
-            
-            // Combo text based on streak (max 10)
-            let comboText = "Good";
-            if(comboStreak >= 10) comboText = "Ultimate!";
-            else if(comboStreak >= 9) comboText = "Godlike!";
-            else if(comboStreak >= 8) comboText = "Legendary!";
-            else if(comboStreak >= 7) comboText = "Unbelievable!";
-            else if(comboStreak >= 6) comboText = "Incredible!";
-            else if(comboStreak >= 5) comboText = "Fantastic!";
-            else if(comboStreak >= 4) comboText = "Amazing!";
-            else if(comboStreak >= 3) comboText = "Great!";
-            else if(comboStreak >= 2) comboText = "Nice!";
-            
-            addComboText(comboText, centerX, centerY);
-          } else {
-            // Reset streak if no lines cleared
-            comboStreak = 0;
-          }
+                     let placedCells = placePiece(piece, g.r, g.c);
+           let cleared = clearLines();
+           
+           // scoring
+           const lines = cleared.rows.length + cleared.cols.length;
+           score += placedCells*scoring.cell + lines*scoring.line;
+           if(lines>=3) score = Math.floor(score*scoring.precisionThree);
+           else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
+           
+           // combo
+           if(lines>0) comboLevel = Math.min(comboLevel+1, scoring.comboSteps.length-1);
+           else comboLevel = 0;
+           score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
+           
+           // Add combo text based on consecutive streak (v1.4.3)
+           if(lines > 0) {
+             comboStreak++; // Increment streak for each line clear
+             let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
+             let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
+             
+             // Combo text based on streak (max 10)
+             let comboText = "Good";
+             if(comboStreak >= 10) comboText = "Ultimate!";
+             else if(comboStreak >= 9) comboText = "Godlike!";
+             else if(comboStreak >= 8) comboText = "Legendary!";
+             else if(comboStreak >= 7) comboText = "Unbelievable!";
+             else if(comboStreak >= 6) comboText = "Incredible!";
+             else if(comboStreak >= 5) comboText = "Fantastic!";
+             else if(comboStreak >= 4) comboText = "Amazing!";
+             else if(comboStreak >= 3) comboText = "Great!";
+             else if(comboStreak >= 2) comboText = "Nice!";
+             
+             // Add cross bonus text if applicable
+             if(cleared.crossBonus > 0) {
+               let bonusText = "";
+               if(cleared.crossBonus >= 999) bonusText = "CLEAR ALL!";
+               else if(cleared.crossBonus >= 6) bonusText = "MEGA CROSS!";
+               else if(cleared.crossBonus >= 4) bonusText = "BIG CROSS!";
+               else if(cleared.crossBonus >= 3) bonusText = "CROSS!";
+               
+               if(bonusText) {
+                 addComboText(bonusText, centerX, centerY + 60);
+               }
+             }
+             
+             addComboText(comboText, centerX, centerY);
+           } else {
+             // Reset streak if no lines cleared
+             comboStreak = 0;
+           }
 
-                     // consume piece
+           // consume piece
            pool[selected.index] = null;
            selected.index=-1;
            turn++;
            if(swapCD>0) swapCD--;
            if(hold.cd>0) hold.cd--;
 
-           // Render FIRST to show the placed piece
+           // Render FIRST to show the placed piece AND cleared lines
            render();
            
-           // THEN check for game over
+           // THEN check for game over (after lines have been cleared)
            if(checkGameOver()) {
              gameOver = true;
              render();
              return;
            }
            
-                       // Auto refill pool if it's empty
-            if(pool.every(p => p === null)) {
-              refillPool();
-              return;
-            }
+           // Auto refill pool if it's empty
+           if(pool.every(p => p === null)) {
+             refillPool();
+             return;
+           }
         }
       }
     }
@@ -909,13 +980,24 @@
       for(let c=0;c<BOARD_SIZE;c++){
         let x = BOARD_X + c*CELL, y = BOARD_Y + r*CELL;
         
-        if(isBlockedCell(r, c)) {
-          // Draw blocked cell (red)
-          ctx.fillStyle = "#f7768e";
+        if(isDurablePiece(r, c)) {
+          // Draw durable piece with durability number
+          let piece = getDurablePiece(r, c);
+          let durability = piece.durability;
+          
+          // Color based on durability (darker = higher durability)
+          let intensity = Math.max(0.3, durability / 5);
+          ctx.fillStyle = `rgba(247, 118, 142, ${intensity})`;
           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
           ctx.strokeStyle = "#d73a49";
           ctx.lineWidth = 2;
           ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+          
+          // Draw durability number
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 16px system-ui";
+          ctx.textAlign = "center";
+          ctx.fillText(durability.toString(), x + CELL/2, y + CELL/2 + 5);
         } else if(grid[r][c]) {
           // Draw placed piece
           ctx.fillStyle = "#5865f2";
@@ -1082,7 +1164,7 @@
   }
 
   // Boot
-  generateBlockedCells();
+  generateDurablePieces();
   
       // Ensure pool starts with 3 pieces
     pool = [null, null, null];

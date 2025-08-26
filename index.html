@@ -304,7 +304,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.5.0</div>
+     <div class="version">v1.6.0</div>
   <div class="debug" id="debug"></div>
   
   <div class="header">
@@ -346,6 +346,7 @@
       <p><span class="hl">Hold (H)</span>: Lưu 1 khối (CD 3 lượt)</p>
       <p><span class="hl">Swap (1/2/3)</span>: Đổi khối sang khối cứu nạn (CD 9 lượt)</p>
              <p><span class="hl">Ô đỏ có số</span>: Piece có độ bền, cần xóa đủ số lần để biến mất</p>
+             <p><span class="hl">Ô bonus x2-x7</span>: Nhân điểm khi clear line chứa ô bonus</p>
     </div>
     
     <div class="card legend">
@@ -353,6 +354,7 @@
       <p><b>Chain</b>: Clear liên tiếp tăng multiplier (≤1.5×)</p>
       <p><b>Precision</b>: Clear ≥2 line nhân điểm (1.2× / 1.5×)</p>
       <p><b>Combo</b>: Tích lũy theo thời gian</p>
+      <p><b>Bonus Pieces</b>: Ô x2-x7 nhân điểm khi clear line</p>
       <p><b>Xoay khối</b>: 32 loại khối với 4 hướng xoay khác nhau</p>
     </div>
     
@@ -376,6 +378,14 @@
       <p>Duy trì combo để tăng điểm</p>
       <p>Quản lý Fill Rate thông minh</p>
              <p>Clear các ô có độ bền (màu đỏ) để tăng điểm</p>
+    </div>
+    
+    <div class="control-group">
+      <h3>🎁 Hệ Thống Bonus</h3>
+      <p>Ô bonus x2-x7 xuất hiện sau clear line (30% chance)</p>
+      <p>Clear line chứa ô bonus → nhân điểm tương ứng</p>
+      <p>Nhiều ô bonus cùng lúc → nhân dồn (x2 × x5 = x10)</p>
+      <p>Ô bonus tự biến mất sau 2-4 lượt</p>
     </div>
   </div>
 </div>
@@ -424,6 +434,8 @@
   let durablePieces = []; // Pieces with durability instead of blocked cells
   let comboTexts = [];
   let comboStreak = 0; // Combo streak counter for consecutive line clears
+  let bonusPieces = []; // Bonus pieces with multipliers
+  let bonusTexts = []; // Bonus score texts
 
   // 32 pieces with rotations (v1.4.0)
   const PIECES = {
@@ -534,6 +546,8 @@
     gameOver = false;
     comboTexts = [];
     comboStreak = 0;
+    bonusPieces = [];
+    bonusTexts = [];
     generateDurablePieces();
     refillPool();
     render();
@@ -602,7 +616,7 @@
 
   function getFillRate(){
     let filled=0;
-    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isDurablePiece(r,c)) filled++;
+    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isDurablePiece(r,c) || isBonusPiece(r,c)) filled++;
     return filled/(BOARD_SIZE*BOARD_SIZE);
   }
   
@@ -634,11 +648,107 @@
       });
     }
   }
+  
+  function generateBonusPieces() {
+    // 30% chance to spawn bonus pieces after line clear
+    if (Math.random() > 0.3) return;
+    
+    // Don't spawn if already at max (4 pieces)
+    if (bonusPieces.length >= 4) return;
+    
+    // Find existing pieces on the board to place bonus on
+    let availablePositions = [];
+    for(let r = 0; r < BOARD_SIZE; r++) {
+      for(let c = 0; c < BOARD_SIZE; c++) {
+        if(grid[r][c] && !isDurablePiece(r, c) && !isBonusPiece(r, c)) {
+          availablePositions.push({r: r, c: c});
+        }
+      }
+    }
+    
+    if(availablePositions.length === 0) return;
+    
+    // Spawn 2-3 bonus pieces
+    let spawnCount = Math.floor(Math.random() * 2) + 2; // 2-3 pieces
+    spawnCount = Math.min(spawnCount, 4 - bonusPieces.length, availablePositions.length);
+    
+    for(let i = 0; i < spawnCount; i++) {
+      let posIndex = Math.floor(Math.random() * availablePositions.length);
+      let pos = availablePositions.splice(posIndex, 1)[0];
+      
+      // Random multiplier: x2, x3, x4, x5, x6, x7
+      let multipliers = [2, 3, 4, 5, 6, 7];
+      let multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
+      
+      // Determine lifetime based on multiplier
+      let lifetime;
+      if(multiplier <= 3) lifetime = 4;      // x2, x3: 4 turns
+      else if(multiplier <= 5) lifetime = 3; // x4, x5: 3 turns
+      else lifetime = 2;                      // x6, x7: 2 turns
+      
+      bonusPieces.push({
+        r: pos.r,
+        c: pos.c,
+        multiplier: multiplier,
+        lifetime: lifetime,
+        color: getBonusColor(multiplier)
+      });
+    }
+  }
+  
+  function getBonusColor(multiplier) {
+    // Color coding for different multipliers
+    if(multiplier <= 3) return "#51cf66";      // Green for x2, x3
+    else if(multiplier <= 5) return "#ffd43b"; // Yellow for x4, x5
+    else return "#ff6b6b";                      // Red for x6, x7
+  }
+  
+  function isBonusPiece(r, c) {
+    return bonusPieces.some(piece => piece.r === r && piece.c === c);
+  }
+  
+  function getBonusPiece(r, c) {
+    return bonusPieces.find(piece => piece.r === r && piece.c === c);
+  }
+  
+  function addBonusText(text, x, y) {
+    const bonusText = {
+      text: text,
+      x: x,
+      y: y,
+      startTime: Date.now(),
+      id: Math.random()
+    };
+    bonusTexts.push(bonusText);
+    
+    // Remove after 2 seconds
+    setTimeout(() => {
+      bonusTexts = bonusTexts.filter(bt => bt.id !== bonusText.id);
+    }, 2000);
+  }
+  
+  function drawBonusTexts() {
+    const currentTime = Date.now();
+    bonusTexts.forEach(bt => {
+      let elapsed = currentTime - bt.startTime;
+      let progress = elapsed / 2000; // 2 seconds total
+      
+      if(progress < 1) {
+        ctx.save();
+        ctx.globalAlpha = 1 - progress;
+        ctx.font = "bold 32px system-ui";
+        ctx.fillStyle = "#5de4c7";
+        ctx.textAlign = "center";
+        ctx.fillText(bt.text, bt.x, bt.y - progress * 30);
+        ctx.restore();
+      }
+    });
+  }
   function canPlace(piece, R, C){
     for(const cell of piece.cells){
       let rr=R+cell.r, cc=C+cell.c;
       if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
-      if(grid[rr][cc] || isDurablePiece(rr, cc)) return false;
+      if(grid[rr][cc] || isDurablePiece(rr, cc) || isBonusPiece(rr, cc)) return false;
     }
     return true;
   }
@@ -656,14 +766,14 @@
     for(let r=0;r<BOARD_SIZE;r++){ 
       let full=true; 
       for(let c=0;c<BOARD_SIZE;c++){ 
-        if(!grid[r][c] && !isDurablePiece(r,c)){full=false;break;} 
+        if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
       } 
       if(full) clearedRows.push(r); 
     }
     for(let c=0;c<BOARD_SIZE;c++){ 
       let full=true; 
       for(let r=0;r<BOARD_SIZE;r++){ 
-        if(!grid[r][c] && !isDurablePiece(r,c)){full=false;break;} 
+        if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
       } 
       if(full) clearedCols.push(c); 
     }
@@ -679,55 +789,97 @@
       else if(crossSize >= 6) crossBonus = 999;  // 2x3 or 3x2+ cross: clear all!
     }
     
-         // Clear rows and columns, including durable pieces
-     // Track which pieces have been affected by cross bonus to avoid double-counting
-     let affectedPieces = new Set();
-     
-     for(let rr of clearedRows){ 
-       for(let c=0;c<BOARD_SIZE;c++) { 
-         grid[rr][c]=0; 
-         // Reduce durability of durable pieces in cleared rows
-         let piece = getDurablePiece(rr, c);
-         if(piece) {
-           if(crossBonus >= 999) {
-             piece.durability = 0; // Clear all for large cross
-           } else {
-             // For cross clear, only apply bonus once per piece
-             if(affectedPieces.has(piece)) {
-               piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
-             } else {
-               piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
-               affectedPieces.add(piece);
-             }
-           }
-         }
-       } 
-     }
-     for(let cc of clearedCols){ 
-       for(let r=0;r<BOARD_SIZE;r++) { 
-         grid[r][cc]=0; 
-         // Reduce durability of durable pieces in cleared columns
-         let piece = getDurablePiece(r, cc);
-         if(piece) {
-           if(crossBonus >= 999) {
-             piece.durability = 0; // Clear all for large cross
-           } else {
-             // For cross clear, only apply bonus once per piece
-             if(affectedPieces.has(piece)) {
-               piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
-             } else {
-               piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
-               affectedPieces.add(piece);
-             }
-           }
-         }
-       } 
-     }
+    // Calculate bonus multipliers for cleared lines
+    let totalBonusMultiplier = 1;
+    let clearedBonusPieces = [];
+    
+    // Check rows for bonus pieces
+    for(let rr of clearedRows) {
+      for(let c = 0; c < BOARD_SIZE; c++) {
+        let bonusPiece = getBonusPiece(rr, c);
+        if(bonusPiece) {
+          totalBonusMultiplier *= bonusPiece.multiplier;
+          clearedBonusPieces.push(bonusPiece);
+        }
+      }
+    }
+    
+    // Check columns for bonus pieces
+    for(let cc of clearedCols) {
+      for(let r = 0; r < BOARD_SIZE; r++) {
+        let bonusPiece = getBonusPiece(r, cc);
+        if(bonusPiece) {
+          totalBonusMultiplier *= bonusPiece.multiplier;
+          clearedBonusPieces.push(bonusPiece);
+        }
+      }
+    }
+    
+    // Clear rows and columns, including durable pieces and bonus pieces
+    // Track which pieces have been affected by cross bonus to avoid double-counting
+    let affectedPieces = new Set();
+    
+    for(let rr of clearedRows){ 
+      for(let c=0;c<BOARD_SIZE;c++) { 
+        grid[rr][c]=0; 
+        // Reduce durability of durable pieces in cleared rows
+        let piece = getDurablePiece(rr, c);
+        if(piece) {
+          if(crossBonus >= 999) {
+            piece.durability = 0; // Clear all for large cross
+          } else {
+            // For cross clear, only apply bonus once per piece
+            if(affectedPieces.has(piece)) {
+              piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
+            } else {
+              piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
+              affectedPieces.add(piece);
+            }
+          }
+        }
+      } 
+    }
+    for(let cc of clearedCols){ 
+      for(let r=0;r<BOARD_SIZE;r++) { 
+        grid[r][cc]=0; 
+        // Reduce durability of durable pieces in cleared columns
+        let piece = getDurablePiece(r, cc);
+        if(piece) {
+          if(crossBonus >= 999) {
+            piece.durability = 0; // Clear all for large cross
+          } else {
+            // For cross clear, only apply bonus once per piece
+            if(affectedPieces.has(piece)) {
+              piece.durability = Math.max(0, piece.durability - 1); // Normal line clear
+            } else {
+              piece.durability = Math.max(0, piece.durability - 1 - crossBonus); // First hit with bonus
+              affectedPieces.add(piece);
+            }
+          }
+        }
+      } 
+    }
     
     // Remove pieces with 0 durability
     durablePieces = durablePieces.filter(piece => piece.durability > 0);
     
-    return {rows:clearedRows, cols:clearedCols, crossBonus: crossBonus};
+    // Remove cleared bonus pieces
+    bonusPieces = bonusPieces.filter(piece => 
+      !clearedBonusPieces.some(cleared => cleared.r === piece.r && cleared.c === piece.c)
+    );
+    
+    // Generate new bonus pieces after line clear
+    if(clearedRows.length > 0 || clearedCols.length > 0) {
+      generateBonusPieces();
+    }
+    
+    return {
+      rows: clearedRows, 
+      cols: clearedCols, 
+      crossBonus: crossBonus,
+      bonusMultiplier: totalBonusMultiplier,
+      clearedBonusPieces: clearedBonusPieces
+    };
   }
 
   function getBiasFactor(FR){
@@ -801,11 +953,16 @@
     comboStreak = 0; // reset combo streak at refill start
     
     // Debug info
-    debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}`);
+    debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces`);
     
     render();
   }
 
+  function decreaseBonusLifetimes() {
+    bonusPieces.forEach(piece => piece.lifetime--);
+    bonusPieces = bonusPieces.filter(piece => piece.lifetime > 0);
+  }
+  
   // Input mapping
   function gridAt(x,y){
     let gx = Math.floor((x-BOARD_X)/CELL);
@@ -850,7 +1007,21 @@
            
            // scoring
            const lines = cleared.rows.length + cleared.cols.length;
-           score += placedCells*scoring.cell + lines*scoring.line;
+           let baseScore = placedCells*scoring.cell + lines*scoring.line;
+           
+           // Apply bonus multiplier if any bonus pieces were cleared
+           if(cleared.bonusMultiplier > 1) {
+             let bonusScore = baseScore * (cleared.bonusMultiplier - 1);
+             score += baseScore + bonusScore;
+             
+             // Display bonus score text
+             let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
+             let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
+             addBonusText(`+${bonusScore}`, centerX, centerY + 120);
+           } else {
+             score += baseScore;
+           }
+           
            if(lines>=3) score = Math.floor(score*scoring.precisionThree);
            else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
            
@@ -902,6 +1073,9 @@
            turn++;
            if(swapCD>0) swapCD--;
            if(hold.cd>0) hold.cd--;
+           
+           // Decrease bonus piece lifetimes
+           decreaseBonusLifetimes();
 
            // Render FIRST to show the placed piece AND cleared lines
            render();
@@ -998,6 +1172,27 @@
           ctx.font = "bold 16px system-ui";
           ctx.textAlign = "center";
           ctx.fillText(durability.toString(), x + CELL/2, y + CELL/2 + 5);
+        } else if(isBonusPiece(r, c)) {
+          // Draw bonus piece with multiplier
+          let piece = getBonusPiece(r, c);
+          let multiplier = piece.multiplier;
+          
+          ctx.fillStyle = piece.color;
+          ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+          
+          // Draw multiplier (x2, x3, etc.)
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 14px system-ui";
+          ctx.textAlign = "center";
+          ctx.fillText(`x${multiplier}`, x + CELL/2, y + CELL/2 + 5);
+          
+          // Draw lifetime indicator
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "10px system-ui";
+          ctx.fillText(`${piece.lifetime}`, x + CELL/2, y + CELL/2 + 20);
         } else if(grid[r][c]) {
           // Draw placed piece
           ctx.fillStyle = "#5865f2";
@@ -1142,6 +1337,7 @@
     drawBoard();
     drawPool();
     drawComboTexts();
+    drawBonusTexts();
     updateStats();
 
     let FR = getFillRate();

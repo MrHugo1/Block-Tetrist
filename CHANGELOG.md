@@ -1,5 +1,39 @@
 # Block Tetrist - Changelog
 
+## [v1.7.0] - 2024-12-19
+### ✨ New Features
+- **Bomb System**: Added explosive bomb pieces that create 3x3 explosion areas
+- **Strategic Bomb Placement**: Bombs spawn when Fill Rate exceeds 60% (once per game)
+- **3x3 Explosion Mechanics**: Bomb explosion clears pieces in 3x3 area with bomb at center
+- **Bomb-Bonus Interaction**: Bombs can activate bonus pieces in explosion area for extra points
+- **Lifetime Management**: Bombs automatically disappear after 1-2 turns if not activated
+
+### 🎯 Gameplay Mechanics
+- **Fill Rate Trigger**: Bombs only spawn when board is more than 60% filled
+- **One Bomb Per Game**: Maximum 1 bomb can exist per game session
+- **Explosion Scoring**: Bombs award points for each piece cleared in explosion area
+- **Bonus Activation**: Bonus pieces in explosion area are activated and award multiplier points
+- **Strategic Depth**: Players must decide when to trigger bombs for maximum effect
+
+### 🎨 Visual Enhancements
+- **Bomb Piece Design**: Red-colored pieces with white borders and lifetime indicators
+- **Explosion Animation**: "BOOM!" text animation when bombs explode
+- **Lifetime Display**: Shows remaining turns before bomb disappears
+- **Visual Distinction**: Bombs are clearly different from bonus pieces
+
+### 🔧 Technical Improvements
+- **Bomb State Management**: Added bombPieces array and bombSpawned flag
+- **Explosion Algorithm**: 3x3 area calculation with board boundary handling
+- **Lifetime System**: Automatic lifetime decrease and cleanup
+- **Integration**: Seamless integration with existing bonus and durable piece systems
+
+### 📝 Documentation
+- **Updated Version Number**: From v1.6.2 to v1.7.0
+- **Enhanced Debug Info**: Added bomb count to debug panel
+- **Comprehensive Logging**: Added console logs for bomb system behavior tracking
+
+---
+
 ## [v1.6.2] - 2024-12-19
 ### 🐛 Bug Fixes
 - **Fixed Bonus System Spawn Logic**: Bonus pieces now spawn on existing pieces instead of empty cells

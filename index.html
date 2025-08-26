@@ -304,7 +304,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.6.2</div>
+     <div class="version">v1.7.0</div>
   <div class="debug" id="debug"></div>
   
   <div class="header">
@@ -436,6 +436,9 @@
   let comboStreak = 0; // Combo streak counter for consecutive line clears
   let bonusPieces = []; // Bonus pieces with multipliers
   let bonusTexts = []; // Bonus score texts
+  let bombPieces = []; // Bomb pieces that explode when lines are cleared
+  let bombTexts = []; // Bomb explosion score texts
+  let bombSpawned = false; // Track if bomb has been spawned this game
 
   // 32 pieces with rotations (v1.4.0)
   const PIECES = {
@@ -548,6 +551,9 @@
     comboStreak = 0;
     bonusPieces = [];
     bonusTexts = [];
+         bombPieces = [];
+     bombTexts = [];
+     bombSpawned = false;
     generateDurablePieces();
     refillPool();
     render();
@@ -615,10 +621,10 @@
   }
 
   function getFillRate(){
-    let filled=0;
-    for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isDurablePiece(r,c) || isBonusPiece(r,c)) filled++;
-    return filled/(BOARD_SIZE*BOARD_SIZE);
-  }
+  let filled=0;
+  for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(grid[r][c] || isDurablePiece(r,c) || isBonusPiece(r,c) || isBombPiece(r,c)) filled++;
+  return filled/(BOARD_SIZE*BOARD_SIZE);
+}
   
   function isDurablePiece(r, c) {
     return durablePieces.some(piece => piece.r === r && piece.c === c);
@@ -726,50 +732,92 @@
   }
   
   function getBonusPiece(r, c) {
-    return bonusPieces.find(piece => piece.r === r && piece.c === c);
-  }
+  return bonusPieces.find(piece => piece.r === r && piece.c === c);
+}
+
+function isBombPiece(r, c) {
+  return bombPieces.some(piece => piece.r === r && piece.c === c);
+}
+
+function getBombPiece(r, c) {
+  return bombPieces.find(piece => piece.r === r && piece.c === c);
+}
   
   function addBonusText(text, x, y) {
-    const bonusText = {
-      text: text,
-      x: x,
-      y: y,
-      startTime: Date.now(),
-      id: Math.random()
-    };
-    bonusTexts.push(bonusText);
-    
-    // Remove after 2 seconds
-    setTimeout(() => {
-      bonusTexts = bonusTexts.filter(bt => bt.id !== bonusText.id);
-    }, 2000);
-  }
+  const bonusText = {
+    text: text,
+    x: x,
+    y: y,
+    startTime: Date.now(),
+    id: Math.random()
+  };
+  bonusTexts.push(bonusText);
+  
+  // Remove after 2 seconds
+  setTimeout(() => {
+    bonusTexts = bonusTexts.filter(bt => bt.id !== bonusText.id);
+  }, 2000);
+}
+
+function addBombText(text, x, y) {
+  const bombText = {
+    text: text,
+    x: x,
+    y: y,
+    startTime: Date.now(),
+    id: Math.random()
+  };
+  bombTexts.push(bombText);
+  
+  // Remove after 2 seconds
+  setTimeout(() => {
+    bombTexts = bombTexts.filter(bt => bt.id !== bombText.id);
+  }, 2000);
+}
   
   function drawBonusTexts() {
-    const currentTime = Date.now();
-    bonusTexts.forEach(bt => {
-      let elapsed = currentTime - bt.startTime;
-      let progress = elapsed / 2000; // 2 seconds total
-      
-      if(progress < 1) {
-        ctx.save();
-        ctx.globalAlpha = 1 - progress;
-        ctx.font = "bold 32px system-ui";
-        ctx.fillStyle = "#5de4c7";
-        ctx.textAlign = "center";
-        ctx.fillText(bt.text, bt.x, bt.y - progress * 30);
-        ctx.restore();
-      }
-    });
-  }
-  function canPlace(piece, R, C){
-    for(const cell of piece.cells){
-      let rr=R+cell.r, cc=C+cell.c;
-      if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
-      if(grid[rr][cc] || isDurablePiece(rr, cc) || isBonusPiece(rr, cc)) return false;
+  const currentTime = Date.now();
+  bonusTexts.forEach(bt => {
+    let elapsed = currentTime - bt.startTime;
+    let progress = elapsed / 2000; // 2 seconds total
+    
+    if(progress < 1) {
+      ctx.save();
+      ctx.globalAlpha = 1 - progress;
+      ctx.font = "bold 32px system-ui";
+      ctx.fillStyle = "#5de4c7";
+      ctx.textAlign = "center";
+      ctx.fillText(bt.text, bt.x, bt.y - progress * 30);
+      ctx.restore();
     }
-    return true;
+  });
+}
+
+function drawBombTexts() {
+  const currentTime = Date.now();
+  bombTexts.forEach(bt => {
+    let elapsed = currentTime - bt.startTime;
+    let progress = elapsed / 2000; // 2 seconds total
+    
+    if(progress < 1) {
+      ctx.save();
+      ctx.globalAlpha = 1 - progress;
+      ctx.font = "bold 32px system-ui";
+      ctx.fillStyle = "#ff6b6b";
+      ctx.textAlign = "center";
+      ctx.fillText(bt.text, bt.x, bt.y - progress * 30);
+      ctx.restore();
+    }
+  });
+}
+  function canPlace(piece, R, C){
+  for(const cell of piece.cells){
+    let rr=R+cell.r, cc=C+cell.c;
+    if(rr<0||rr>=BOARD_SIZE||cc<0||cc>=BOARD_SIZE) return false;
+    if(grid[rr][cc] || isDurablePiece(rr, cc) || isBonusPiece(rr, cc) || isBombPiece(rr, cc)) return false;
   }
+  return true;
+}
   function validPlacementsAny(p){
     for(let r=0;r<BOARD_SIZE;r++) for(let c=0;c<BOARD_SIZE;c++) if(canPlace(p, r, c)) return true;
     return false;
@@ -784,19 +832,19 @@
     for(let r=0;r<BOARD_SIZE;r++){ 
       let full=true; 
       for(let c=0;c<BOARD_SIZE;c++){ 
-        // A line is full if it has pieces OR durable pieces OR bonus pieces
-        if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
-      } 
-      if(full) clearedRows.push(r); 
-    }
-    for(let c=0;c<BOARD_SIZE;c++){ 
-      let full=true; 
-      for(let r=0;r<BOARD_SIZE;r++){ 
-        // A line is full if it has pieces OR durable pieces OR bonus pieces
-        if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c)){full=false;break;} 
-      } 
-      if(full) clearedCols.push(c); 
-    }
+             // A line is full if it has pieces OR durable pieces OR bonus pieces OR bomb pieces
+     if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c) && !isBombPiece(r,c)){full=false;break;} 
+   } 
+   if(full) clearedRows.push(r); 
+ }
+ for(let c=0;c<BOARD_SIZE;c++){ 
+   let full=true; 
+   for(let r=0;r<BOARD_SIZE;r++){ 
+     // A line is full if it has pieces OR durable pieces OR bonus pieces OR bomb pieces
+     if(!grid[r][c] && !isDurablePiece(r,c) && !isBonusPiece(r,c) && !isBombPiece(r,c)){full=false;break;} 
+   } 
+   if(full) clearedCols.push(c); 
+ }
     
     // Check for cross clear bonus
     let crossBonus = 0;
@@ -897,10 +945,35 @@
       console.log(`Bonus pieces after spawn: ${bonusPieces.length}`);
     }
     
-    // Remove cleared bonus pieces from the bonusPieces array (AFTER spawning new ones)
-    bonusPieces = bonusPieces.filter(piece => 
-      !clearedBonusPieces.some(cleared => cleared.r === piece.r && cleared.c === piece.c)
-    );
+         // Remove cleared bonus pieces from the bonusPieces array (AFTER spawning new ones)
+     bonusPieces = bonusPieces.filter(piece => 
+       !clearedBonusPieces.some(cleared => cleared.r === piece.r && cleared.c === piece.c)
+     );
+
+     // Check for bombs in cleared lines and explode them
+     let clearedBombs = [];
+     for(let rr of clearedRows) {
+       for(let c = 0; c < BOARD_SIZE; c++) {
+         if(isBombPiece(rr, c)) {
+           clearedBombs.push({r: rr, c: c});
+         }
+       }
+     }
+     for(let cc of clearedCols) {
+       for(let r = 0; r < BOARD_SIZE; r++) {
+         if(isBombPiece(r, cc)) {
+           clearedBombs.push({r: r, c: cc});
+         }
+       }
+     }
+     
+     // Explode bombs that are in cleared lines
+     for(let bomb of clearedBombs) {
+       explodeBomb(bomb.r, bomb.c);
+     }
+
+     // Try to generate bomb piece if conditions are met
+     generateBombPiece();
     
     return {
       rows: clearedRows, 
@@ -981,8 +1054,11 @@
     comboLevel = 0; // reset combo at refill start
     comboStreak = 0; // reset combo streak at refill start
     
+    // Try to generate bomb piece if conditions are met
+    generateBombPiece();
+    
     // Debug info
-    debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces`);
+    debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces<br/>Bomb: ${bombPieces.length}/1 piece`);
     
     render();
   }
@@ -1112,8 +1188,11 @@
            if(swapCD>0) swapCD--;
            if(hold.cd>0) hold.cd--;
            
-           // Decrease bonus piece lifetimes
-           decreaseBonusLifetimes();
+                       // Decrease bonus piece lifetimes
+            decreaseBonusLifetimes();
+            
+            // Decrease bomb lifetimes
+            decreaseBombLifetimes();
 
            // Render FIRST to show the placed piece AND cleared lines
            render();
@@ -1215,30 +1294,52 @@
           ctx.font = "bold 16px system-ui";
           ctx.textAlign = "center";
           ctx.fillText(durability.toString(), x + CELL/2, y + CELL/2 + 5);
-        } else if(isBonusPiece(r, c)) {
-          // Draw bonus piece with multiplier
-          let piece = getBonusPiece(r, c);
-          let multiplier = piece.multiplier;
-          
-          console.log(`Drawing bonus piece x${multiplier} at (${r}, ${c}) with color ${piece.color}`);
-          
-          ctx.fillStyle = piece.color;
-          ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
-          ctx.strokeStyle = "#ffffff";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
-          
-          // Draw multiplier (x2, x3, etc.)
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 14px system-ui";
-          ctx.textAlign = "center";
-          ctx.fillText(`x${multiplier}`, x + CELL/2, y + CELL/2 + 5);
-          
-          // Draw lifetime indicator
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "10px system-ui";
-          ctx.fillText(`${piece.lifetime}`, x + CELL/2, y + CELL/2 + 20);
-        } else if(grid[r][c]) {
+                 } else if(isBombPiece(r, c)) {
+           // Draw bomb piece with distinct black color and red border
+           let piece = getBombPiece(r, c);
+           let lifetime = piece.lifetime;
+           
+           // Black background with red border
+           ctx.fillStyle = "#000000";
+           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+           ctx.strokeStyle = "#ff0000";
+           ctx.lineWidth = 3;
+           ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+           
+           // Draw "BOMB" text
+           ctx.fillStyle = "#ffffff";
+           ctx.font = "bold 10px system-ui";
+           ctx.textAlign = "center";
+           ctx.fillText("BOMB", x + CELL/2, y + CELL/2 + 5);
+           
+           // Draw lifetime indicator
+           ctx.fillStyle = "#ff0000";
+           ctx.font = "bold 12px system-ui";
+           ctx.fillText(`${lifetime}`, x + CELL/2, y + CELL/2 + 20);
+         } else if(isBonusPiece(r, c)) {
+           // Draw bonus piece with multiplier
+           let piece = getBonusPiece(r, c);
+           let multiplier = piece.multiplier;
+           
+           console.log(`Drawing bonus piece x${multiplier} at (${r}, ${c}) with color ${piece.color}`);
+           
+           ctx.fillStyle = piece.color;
+           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
+           ctx.strokeStyle = "#ffffff";
+           ctx.lineWidth = 2;
+           ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
+           
+           // Draw multiplier (x2, x3, etc.)
+           ctx.fillStyle = "#ffffff";
+           ctx.font = "bold 14px system-ui";
+           ctx.textAlign = "center";
+           ctx.fillText(`x${multiplier}`, x + CELL/2, y + CELL/2 + 5);
+           
+           // Draw lifetime indicator
+           ctx.fillStyle = "#ffffff";
+           ctx.font = "10px system-ui";
+           ctx.fillText(`${piece.lifetime}`, x + CELL/2, y + CELL/2 + 20);
+         } else if(grid[r][c]) {
           // Draw placed piece
           ctx.fillStyle = "#5865f2";
           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
@@ -1381,9 +1482,10 @@
     
     drawBoard();
     drawPool();
-    drawComboTexts();
-    drawBonusTexts();
-    updateStats();
+         drawComboTexts();
+     drawBonusTexts();
+     drawBombTexts();
+     updateStats();
 
     let FR = getFillRate();
     let fairness = justDead? "Có lượt kẹt gần đây" : "Ổn";
@@ -1403,6 +1505,125 @@
        document.getElementById('game-over-overlay').style.display = 'none';
      }
   }
+
+  function generateBombPiece() {
+  // Only spawn if Fill Rate > 60% and no bomb has been spawned yet
+  let FR = getFillRate();
+  if (FR <= 0.6 || bombSpawned) {
+    console.log(`Bomb spawn failed: FR=${FR.toFixed(2)} (need >0.6) or already spawned=${bombSpawned}`);
+    return;
+  }
+
+  // Don't spawn if already at max (1 bomb)
+  if (bombPieces.length >= 1) {
+    console.log("Bomb spawn failed: Already at max (1 bomb)");
+    return;
+  }
+
+  // Find positions on EXISTING pieces (not empty cells) to place bomb on
+  let availablePositions = [];
+  for(let r = 0; r < BOARD_SIZE; r++) {
+    for(let c = 0; c < BOARD_SIZE; c++) {
+      // Only spawn on cells that have pieces (grid[r][c] = 1) or durable pieces
+      if((grid[r][c] || isDurablePiece(r, c)) && !isBonusPiece(r, c) && !isBombPiece(r, c)) {
+        availablePositions.push({r: r, c: c});
+      }
+    }
+  }
+  
+  if(availablePositions.length === 0) {
+    console.log("Bomb spawn failed: No available positions on existing pieces");
+    return;
+  }
+
+  // Pick random position from available ones
+  let posIndex = Math.floor(Math.random() * availablePositions.length);
+  let pos = availablePositions[posIndex];
+  
+  // Random lifetime 1-2 turns
+  let lifetime = Math.floor(Math.random() * 2) + 1;
+
+  bombPieces.push({
+    r: pos.r,
+    c: pos.c,
+    lifetime: lifetime,
+    color: "#000000" // Black color for bomb to distinguish from durable pieces
+  });
+  
+  bombSpawned = true; // Mark that bomb has been spawned this game
+  console.log(`Bomb spawned at (${pos.r}, ${pos.c}) with ${lifetime} turns lifetime. FR was ${FR.toFixed(2)}`);
+}
+
+  function decreaseBombLifetimes() {
+    console.log(`Decreasing bomb lifetimes. Before: ${bombPieces.length} pieces`);
+    bombPieces.forEach(piece => {
+      piece.lifetime--;
+      console.log(`Bomb at (${piece.r}, ${piece.c}) lifetime: ${piece.lifetime + 1} -> ${piece.lifetime}`);
+    });
+    let beforeCount = bombPieces.length;
+    bombPieces = bombPieces.filter(piece => piece.lifetime > 0);
+    let afterCount = bombPieces.length;
+    if(beforeCount !== afterCount) {
+      console.log(`Removed ${beforeCount - afterCount} expired bomb pieces. Remaining: ${afterCount}`);
+    }
+  }
+
+  function explodeBomb(bombR, bombC) {
+  console.log(`Bomb exploded at (${bombR}, ${bombC})!`);
+
+  let explosionScore = 0;
+  let bonusPiecesActivated = [];
+
+  // Clear all pieces in the 3x3 area around the bomb
+  for(let r = bombR - 1; r <= bombR + 1; r++) {
+    for(let c = bombC - 1; c <= bombC + 1; c++) {
+      if(r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
+        if(grid[r][c] || isDurablePiece(r, c) || isBonusPiece(r, c)) {
+          // If it's a durable piece, reduce its durability
+          let piece = getDurablePiece(r, c);
+          if(piece) {
+            piece.durability = Math.max(0, piece.durability - 1);
+            console.log(`Durable piece at (${r}, ${c}) durability reduced to ${piece.durability}`);
+            explosionScore += 1; // Score for hitting durable piece
+          }
+          
+          // If it's a bonus piece, activate it and add to score
+          let bonusPiece = getBonusPiece(r, c);
+          if(bonusPiece) {
+            bonusPiecesActivated.push(bonusPiece);
+            explosionScore += bonusPiece.multiplier; // Score for bonus piece
+            console.log(`Bonus piece x${bonusPiece.multiplier} at (${r}, ${c}) activated by explosion!`);
+          }
+          
+          // Clear the cell
+          grid[r][c] = 0;
+          explosionScore += 1; // Score for clearing regular piece
+          console.log(`Cell at (${r}, ${c}) cleared.`);
+        }
+      }
+    }
+  }
+
+  // Remove pieces with 0 durability
+  durablePieces = durablePieces.filter(piece => piece.durability > 0);
+  
+  // Remove activated bonus pieces
+  bonusPieces = bonusPieces.filter(piece => 
+    !bonusPiecesActivated.some(activated => activated.r === piece.r && activated.c === piece.c)
+  );
+
+  // Add explosion score text
+  let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
+  let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
+  addBombText(`💥 BOOM! +${explosionScore}`, centerX, centerY + 120);
+
+  // Add score for explosion
+  score += explosionScore;
+  
+  // Remove the bomb piece that exploded
+  bombPieces = bombPieces.filter(bomb => !(bomb.r === bombR && bomb.c === bombC));
+  console.log(`Bomb exploded, score added: +${explosionScore}, bomb pieces remaining: ${bombPieces.length}`);
+}
 
   // Boot
   generateDurablePieces();

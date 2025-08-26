@@ -1,11 +1,18 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.6.2  
+**Phiên bản:** v1.7.0  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
 
-## ✨ Tính Năng Mới Nhất (v1.6.2)
+## ✨ Tính Năng Mới Nhất (v1.7.0)
+
+### 💣 Hệ Thống Bomb
+- **Ô Bomb Chiến Thuật**: Xuất hiện khi Fill Rate > 60% (1 lần/1 ván)
+- **Nổ 3x3 Thông Minh**: Bomb nổ vùng 3x3 với bomb ở trung tâm
+- **Kích Hoạt Bonus**: Bomb có thể kích hoạt ô bonus trong vùng nổ
+- **Tính Điểm Nổ**: Mỗi ô bị nổ cho điểm tương ứng
+- **Lifetime Management**: Bomb tự biến mất sau 1-2 lượt nếu không nổ
 
 ### 🎁 Hệ Thống Bonus Points
 - **Ô Bonus x2-x7**: Xuất hiện sau khi clear line (30% chance)
@@ -54,6 +61,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - Quản lý Fill Rate thông minh
 - Clear các ô có độ bền (màu đỏ) để tăng điểm
 - Tận dụng ô bonus để nhân điểm
+- **Chiến thuật sử dụng bomb**: Kích hoạt bomb đúng thời điểm để tối đa hóa điểm
 
 ## 🔧 Cài Đặt & Chạy
 
@@ -80,6 +88,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - **Precision bonus**: 1.2× (2 lines), 1.5× (3+ lines)
 - **Chain multiplier**: Tối đa 1.5×
 - **Bonus multiplier**: x2 đến x7 (nhân dồn)
+- **Bomb explosion**: 1 điểm/ô bị nổ + bonus points từ bonus pieces
 
 ### 🎲 Game Mechanics
 - **Bàn chơi**: 8×8 ô
@@ -87,6 +96,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - **Pool size**: 3 khối
 - **Bonus pieces**: Tối đa 4 ô trên bàn
 - **Durable pieces**: 6-12 ô với độ bền 2-5
+- **Bomb pieces**: Tối đa 1 ô trên bàn (khi FR > 60%)
 
 ## 🐛 Báo Cáo Lỗi & Đóng Góp
 
@@ -104,6 +114,13 @@ Nếu gặp vấn đề, vui lòng:
 4. Tạo Pull Request
 
 ## 📜 Lịch Sử Phiên Bản
+
+### v1.7.0 (19/12/2024)
+- ✨ Thêm hệ thống bomb hoàn chỉnh với nổ 3x3
+- 🎯 Bomb spawn khi Fill Rate > 60% (1 lần/1 ván)
+- 💥 Bomb có thể kích hoạt bonus pieces trong vùng nổ
+- 🔧 Tích hợp bomb system với bonus và durable pieces
+- 📝 Cập nhật version và documentation
 
 ### v1.6.2 (19/12/2024)
 - 🐛 Sửa toàn bộ hệ thống bonus points

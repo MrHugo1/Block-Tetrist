@@ -304,7 +304,7 @@
 </head>
 <body>
 <div id="wrap">
-  <div class="version">v1.4.2</div>
+     <div class="version">v1.4.3</div>
   <div class="debug" id="debug"></div>
   
   <div class="header">
@@ -423,6 +423,7 @@
   let gameOver = false;
   let blockedCells = [];
   let comboTexts = [];
+  let comboStreak = 0; // Combo streak counter for consecutive line clears
 
   // 32 pieces with rotations (v1.4.0)
   const PIECES = {
@@ -532,6 +533,7 @@
     turn = 0;
     gameOver = false;
     comboTexts = [];
+    comboStreak = 0;
     generateBlockedCells();
     refillPool();
     render();
@@ -740,6 +742,7 @@
     }
 
     comboLevel = 0; // reset combo at refill start
+    comboStreak = 0; // reset combo streak at refill start
     
     // Debug info
     debug(`Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}`);
@@ -798,14 +801,28 @@
           else comboLevel = 0;
           score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
           
-          // Add combo text (v1.4.1)
+          // Add combo text based on consecutive streak (v1.4.3)
           if(lines > 0) {
+            comboStreak++; // Increment streak for each line clear
             let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
             let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
+            
+            // Combo text based on streak (max 10)
             let comboText = "Good";
-            if(lines >= 3) comboText = "Exceptional!";
-            else if(lines >= 2) comboText = "Great!";
+            if(comboStreak >= 10) comboText = "Ultimate!";
+            else if(comboStreak >= 9) comboText = "Godlike!";
+            else if(comboStreak >= 8) comboText = "Legendary!";
+            else if(comboStreak >= 7) comboText = "Unbelievable!";
+            else if(comboStreak >= 6) comboText = "Incredible!";
+            else if(comboStreak >= 5) comboText = "Fantastic!";
+            else if(comboStreak >= 4) comboText = "Amazing!";
+            else if(comboStreak >= 3) comboText = "Great!";
+            else if(comboStreak >= 2) comboText = "Nice!";
+            
             addComboText(comboText, centerX, centerY);
+          } else {
+            // Reset streak if no lines cleared
+            comboStreak = 0;
           }
 
                      // consume piece

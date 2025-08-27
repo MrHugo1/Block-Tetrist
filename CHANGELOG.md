@@ -1,6 +1,19 @@
 # Block Tetrist - Changelog
 
-## [v1.7.0] - 2024-12-19
+## [v1.8.1] - 2024-12-19
+### 🐛 Bug Fixes
+- **Fixed Bomb in Basic Mode**: Bomb pieces no longer appear or function in Basic Mode
+- **Mode-Specific Logic**: All bomb-related functions now properly check game mode before execution
+- **Fill Rate Calculation**: Fixed getFillRate() to only count bomb pieces in Blast Mode
+- **Line Clear Logic**: Fixed clearLines() to only process bomb pieces in Blast Mode
+- **Rendering**: Fixed drawBoard() to only display bomb pieces in Blast Mode
+
+### 🔧 Technical Improvements
+- **Conditional Execution**: Added game mode checks for all bomb-related functions
+- **Performance**: Reduced unnecessary bomb processing in non-Blast modes
+- **Code Consistency**: Ensured all game features respect mode restrictions
+
+## [v1.8.0] - 2024-12-19
 ### ✨ New Features
 - **Bomb System**: Added explosive bomb pieces that create 3x3 explosion areas
 - **Strategic Bomb Placement**: Bombs spawn when Fill Rate exceeds 60% (once per game)

@@ -1,13 +1,21 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.7.0  
+**Phiên bản:** v1.8.1  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
 
-## ✨ Tính Năng Mới Nhất (v1.7.0)
+## ✨ Tính Năng Mới Nhất (v1.8.0)
 
-### 💣 Hệ Thống Bomb
+### 🎮 Hệ Thống Game Modes
+- **4 Chế Độ Chơi**: Basic, Blocker, Multiplier, Blast
+- **Basic Mode**: Chain multiplier cơ bản
+- **Blocker Mode**: Durable pieces + Precision bonus
+- **Multiplier Mode**: Bonus points system
+- **Blast Mode**: Bomb explosion system
+- **High Score Riêng Biệt**: Mỗi mode có điểm cao nhất riêng
+
+### 💣 Hệ Thống Bomb (Blast Mode)
 - **Ô Bomb Chiến Thuật**: Xuất hiện khi Fill Rate > 60% (1 lần/1 ván)
 - **Nổ 3x3 Thông Minh**: Bomb nổ vùng 3x3 với bomb ở trung tâm
 - **Kích Hoạt Bonus**: Bomb có thể kích hoạt ô bonus trong vùng nổ
@@ -114,6 +122,15 @@ Nếu gặp vấn đề, vui lòng:
 4. Tạo Pull Request
 
 ## 📜 Lịch Sử Phiên Bản
+
+### v1.8.0 (19/12/2024)
+- ✨ Thêm hệ thống game modes hoàn chỉnh với 4 chế độ chơi
+- 🎮 Basic Mode: Chain multiplier cơ bản
+- 🛡️ Blocker Mode: Durable pieces + Precision bonus
+- ⭐ Multiplier Mode: Bonus points system
+- 💣 Blast Mode: Bomb explosion system
+- 🏆 High score riêng biệt cho từng mode
+- 🎨 Giao diện chọn mode đẹp mắt với popup
 
 ### v1.7.0 (19/12/2024)
 - ✨ Thêm hệ thống bomb hoàn chỉnh với nổ 3x3

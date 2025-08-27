@@ -447,7 +447,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.13</div>
+     <div class="version">v1.9.15</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -623,7 +623,7 @@
     comboCap: 1.5
   };
   const holdCfg = { cdTurns: 3 };
-  const swapCfg = { cdTurns: 9, rescueSet: ["1x2","1x2_90","1x3","1x3_90","I3","I3_90","L3","L3_90","L3_180","L3_270"] };
+  const swapCfg = { cdTurns: 9, rescueSet: ["I2","I2_90","I3","I3_90","L3","L3_90","L3_180","L3_270"] };
   const frWindow = { low: 0.30, high: 0.70 };
   const biasCfg = { base: 0.05, alpha: 0.20, betaJustDead: 0.10, cap: 0.25 };
   const guardrail = { windowRefills: 50, maxDead: 1 };
@@ -662,104 +662,334 @@
   let bombTexts = []; // Bomb explosion score texts
   let bombSpawned = false; // Track if bomb has been spawned this game
 
-           // 65 pieces with rotations (v1.9.13) - Fixed duplicates, added I5 with full rotations, U5 with full rotations, U6 with full rotations, and D2 with full rotations, removed L5, IL5, U3, BR2x2 and T6
-   const PIECES = {
-     // 1x1 - 1 direction (symmetric)
-     "1x1":[[0,0]],
+  // 65 pieces with rotations (v1.9.15) - Refactored to use string-based piece definitions with decodePiece function
+  // Format: 'x' = filled cell (1), 'o' = empty cell (0)
+  // Multi-line format for better readability
+  function decodePiece(...rows) {
+    const coords = [];
+    for (let r = 0; r < rows.length; r++) {
+      const row = rows[r];
+      for (let c = 0; c < row.length; c++) {
+        if (row[c] === 'x') {
+          coords.push([r, c]);
+        }
+        // 'o' represents empty cells (0), so we skip them
+      }
+    }
+    return coords;
+  }
+  
+  const PIECES = {
+    // 1x1 - 1 direction (symmetric)
+    "1x1": decodePiece("x"),
+    
+    // I2, I3, I4, S4, Z4 - 2 directions (0°, 90°)
+    "I2": decodePiece(
+      "x",
+      "x"
+    ), 
+    "I2_90": decodePiece("xx"),
+    "I3": decodePiece(
+      "x",
+      "x",
+      "x"
+    ), 
+    "I3_90": decodePiece("xxx"),
+    "I4": decodePiece(
+      "x",
+      "x",
+      "x",
+      "x"
+    ), 
+    "I4_90": decodePiece("xxxx"),
+    "S4": decodePiece(
+      "oxx",
+      "xxo"
+    ), 
+    "S4_90": decodePiece(
+      "ox",
+      "xx",
+      "xo"
+    ),
+    "Z4": decodePiece(
+      "xxo",
+      "oxx"
+    ), 
+    "Z4_90": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ),
+    
+    // 2x2, O3 - 1 direction (symmetric)
+    "2x2": decodePiece(
+      "xx",
+      "xx"
+    ),
+    "O3": decodePiece(
+      "xxx",
+      "xxx",
+      "xxx"
+    ),
+    
+    // L3, L4, T4 - 4 directions (0°, 90°, 180°, 270°)
+    "L3": decodePiece(
+      "xo",
+      "xx"
+    ), 
+    "L3_90": decodePiece(
+      "ox",
+      "xx"
+    ), 
+    "L3_180": decodePiece(
+      "xx",
+      "ox"
+    ), 
+    "L3_270": decodePiece(
+      "xx",
+      "xo"
+    ),
+    "L4": decodePiece(
+      "xo",
+      "xo",
+      "xx"
+    ), 
+    "L4_90": decodePiece(
+      "oox",
+      "xxx"
+    ), 
+    "L4_180": decodePiece(
+      "xx",
+      "ox",
+      "ox"
+    ), 
+    "L4_270": decodePiece(
+      "xxx",
+      "xoo"
+    ),
+    "T4": decodePiece(
+      "xxx",
+      "oxo"
+    ), 
+    "T4_90": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ), 
+    "T4_180": decodePiece(
+      "oxo",
+      "xxx"
+    ), 
+    "T4_270": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ),
+    
+    // New pieces from image - 4 directions each (0°, 90°, 180°, 270°)
+    // Shape 1: 2x3 rectangle
+    "R2x3": decodePiece(
+      "xxx",
+      "xxx"
+    ), 
+    "R2x3_90": decodePiece(
+      "xx",
+      "xx",
+      "xx"
+    ), 
+    "R2x3_180": decodePiece(
+      "xxx",
+      "xxx"
+    ), 
+    "R2x3_270": decodePiece(
+      "xx",
+      "xx",
+      "xx"
+    ),
+    
+    // Shape 1.5: I5 - 5 ô thẳng (2 hướng)
+    "I5": decodePiece(
+      "x",
+      "x",
+      "x",
+      "x",
+      "x"
+    ), 
+    "I5_90": decodePiece("xxxxx"),
+    
+    // Shape 4: 2x2 + left extension
+    "L2x2": decodePiece(
+      "xo",
+      "xx",
+      "xo"
+    ), 
+    "L2x2_90": decodePiece(
+      "oox",
+      "xxx"
+    ), 
+    "L2x2_180": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ), 
+    "L2x2_270": decodePiece(
+      "xxx",
+      "oox"
+    ),
+    
+    // Shape 5.5: U5 - U shape 5 ô (4 hướng rotation)
+    "U5": decodePiece(
+      "xox",
+      "xxx"
+    ),           // 0°: U shape ngang
+    "U5_90": decodePiece(
+      "xx",
+      "xo",
+      "xx"
+    ),         // 90°: U shape dọc
+    "U5_180": decodePiece(
+      "xxx",
+      "xox"
+    ),        // 180°: U shape ngang đảo
+    "U5_270": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ),        // 270°: U shape dọc đảo
      
-     // 1x2, 1x3, I3, I4, S4, Z4 - 2 directions (0°, 90°)
-     "1x2":[[0,0],[0,1]], "1x2_90":[[0,0],[1,0]],
-     "1x3":[[0,0],[0,1],[0,2]], "1x3_90":[[0,0],[1,0],[2,0]],
-     "I3":[[0,0],[1,0],[2,0]], "I3_90":[[0,0],[0,1],[0,2]],
-     "I4":[[0,0],[1,0],[2,0],[3,0]], "I4_90":[[0,0],[0,1],[0,2],[0,3]],
-     "S4":[[0,1],[0,2],[1,0],[1,1]], "S4_90":[[0,0],[1,0],[1,1],[2,1]],
-     "Z4":[[0,0],[0,1],[1,1],[1,2]], "Z4_90":[[0,1],[1,0],[1,1],[2,0]],
+    // Shape 6: 2x2 + right extension
+    "R2x2R": decodePiece(
+      "xx",
+      "xx",
+      "ox"
+    ), 
+    "R2x2R_90": decodePiece(
+      "oox",
+      "xxx"
+    ), 
+    "R2x2R_180": decodePiece(
+      "ox",
+      "xx",
+      "xx"
+    ), 
+    "R2x2R_270": decodePiece(
+      "xxx",
+      "xoo"
+    ),
      
-     // 2x2, O3 - 1 direction (symmetric)
-     "2x2":[[0,0],[0,1],[1,0],[1,1]],
-     "O3":[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+    // Shape 7: 2x2 + top-left extension
+    "TL2x2": decodePiece(
+      "oxx",
+      "oxx",
+      "xoo"
+    ), 
+    "TL2x2_90": decodePiece(
+      "xoo",
+      "xx",
+      "xx"
+    ), 
+    "TL2x2_180": decodePiece(
+      "oox",
+      "xx",
+      "xx"
+    ), 
+    "TL2x2_270": decodePiece(
+      "xx",
+      "xx",
+      "oox"
+    ),
      
-     // L3, L4, T4 - 4 directions (0°, 90°, 180°, 270°)
-     "L3":[[0,0],[1,0],[1,1]], "L3_90":[[0,0],[0,1],[1,0]], "L3_180":[[0,0],[0,1],[1,1]], "L3_270":[[0,1],[1,0],[1,1]],
-     "L4":[[0,0],[1,0],[2,0],[2,1]], "L4_90":[[0,0],[0,1],[0,2],[1,0]], "L4_180":[[0,0],[0,1],[1,1],[2,1]], "L4_270":[[0,1],[1,1],[2,0],[2,1]],
-     "T4":[[0,0],[0,1],[0,2],[1,1]], "T4_90":[[0,0],[1,0],[1,1],[2,0]], "T4_180":[[0,1],[1,0],[1,1],[1,2]], "T4_270":[[0,1],[1,0],[1,1],[2,1]],
+    // Shape 9: Cross shape (1 direction - symmetric)
+    "Cross": decodePiece(
+      "oxo",
+      "xxx",
+      "oxo"
+    ),
      
-     // New pieces from image - 4 directions each (0°, 90°, 180°, 270°)
-     // Shape 1: 2x3 rectangle
-     "R2x3":[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], 
-     "R2x3_90":[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]], 
-     "R2x3_180":[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]], 
-     "R2x3_270":[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]],
+    // Shape 10: T shape (4 cells) - different from existing T4
+    "T4B": decodePiece(
+      "xxx",
+      "oxo"
+    ), 
+    "T4B_90": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ), 
+    "T4B_180": decodePiece(
+      "oxo",
+      "xxx"
+    ), 
+    "T4B_270": decodePiece(
+      "ox",
+      "xx",
+      "ox"
+    ),
      
-     // Shape 1.5: I5 - 5 ô thẳng (2 hướng)
-     "I5":[[0,0],[1,0],[2,0],[3,0],[4,0]], 
-     "I5_90":[[0,0],[0,1],[0,2],[0,3],[0,4]],
+    // Shape 11: 2x2 + top-right extension
+    "TR2x2": decodePiece(
+      "xx",
+      "xx",
+      "oox"
+    ), 
+    "TR2x2_90": decodePiece(
+      "oox",
+      "xxx"
+    ), 
+    "TR2x2_180": decodePiece(
+      "xoo",
+      "xx",
+      "xx"
+    ), 
+    "TR2x2_270": decodePiece(
+      "xxx",
+      "xoo"
+    ),
      
-           // Shape 2: T rotated 90° clockwise (6 cells) - ĐÃ XÓA
-     
-     // Shape 3: Inverted L - ĐÃ XÓA
-     
-     // Shape 4: 2x2 + left extension
-     "L2x2":[[0,0],[0,1],[1,0],[1,1],[2,0]], 
-     "L2x2_90":[[0,0],[0,1],[0,2],[1,0],[1,1]], 
-     "L2x2_180":[[0,1],[1,0],[1,1],[2,0],[2,1]], 
-     "L2x2_270":[[0,0],[0,1],[1,0],[1,1],[1,2]],
-     
-     // Shape 4.5: L5 - L shape 5 ô (4 hướng rotation) - ĐÃ XÓA
-     
-           // Shape 5: U shape (3x3 outline) - 3 directions (0°, 90°, 270°) - ĐÃ XÓA
+    // Shape 12: Vertical line + right extension
+    "VL4R": decodePiece(
+      "xo",
+      "xo",
+      "xo",
+      "xo"
+    ), 
+    "VL4R_90": decodePiece(
+      "oooox",
+      "xxxx"
+    ), 
+    "VL4R_180": decodePiece(
+      "ox",
+      "ox",
+      "ox",
+      "ox"
+    ), 
+    "VL4R_270": decodePiece(
+      "xxxx",
+      "xooo"
+    ),
       
-      // Shape 5.5: U5 - U shape 5 ô (4 hướng rotation)
-      "U5":[[0,0],[0,2],[1,0],[1,1],[1,2]],           // 0°: U shape ngang
-      "U5_90":[[0,0],[1,0],[2,0],[1,1],[2,1]],         // 90°: U shape dọc
-      "U5_180":[[0,0],[0,1],[1,0],[1,1],[1,2]],        // 180°: U shape ngang đảo
-      "U5_270":[[0,1],[1,1],[2,1],[1,0],[2,0]],        // 270°: U shape dọc đảo
-     
-     // Shape 6: 2x2 + right extension
-     "R2x2R":[[0,0],[0,1],[1,0],[1,1],[0,2]], 
-     "R2x2R_90":[[0,0],[0,1],[0,2],[1,0],[1,1]], 
-     "R2x2R_180":[[0,0],[0,1],[1,0],[1,1],[1,2]], 
-     "R2x2R_270":[[0,0],[0,1],[0,2],[1,0],[1,1]],
-     
-     // Shape 7: 2x2 + top-left extension
-     "TL2x2":[[0,1],[0,2],[1,1],[1,2],[0,0]], 
-     "TL2x2_90":[[0,0],[0,1],[1,0],[1,1],[2,0]], 
-     "TL2x2_180":[[0,0],[0,1],[1,0],[1,1],[1,2]], 
-     "TL2x2_270":[[0,0],[0,1],[0,2],[1,0],[1,1]],
-     
-           // Shape 8: 2x2 + bottom-right extension - ĐÃ XÓA
-     
-     // Shape 9: Cross shape (1 direction - symmetric)
-     "Cross":[[0,1],[1,0],[1,1],[1,2],[2,1]],
-     
-     // Shape 10: T shape (4 cells) - different from existing T4
-     "T4B":[[0,0],[0,1],[0,2],[1,1]], 
-     "T4B_90":[[0,0],[1,0],[1,1],[2,0]], 
-     "T4B_180":[[0,1],[1,0],[1,1],[1,2]], 
-     "T4B_270":[[0,1],[1,0],[1,1],[2,1]],
-     
-     // Shape 11: 2x2 + top-right extension
-     "TR2x2":[[0,0],[0,1],[1,0],[1,1],[0,2]], 
-     "TR2x2_90":[[0,0],[0,1],[0,2],[1,0],[1,1]], 
-     "TR2x2_180":[[0,0],[0,1],[1,0],[1,1],[1,2]], 
-     "TR2x2_270":[[0,0],[0,1],[0,2],[1,0],[1,1]],
-     
-           // Shape 12: Vertical line + right extension
-      "VL4R":[[0,0],[1,0],[2,0],[3,0],[2,1]], 
-      "VL4R_90":[[0,0],[0,1],[0,2],[0,3],[1,3]], 
-      "VL4R_180":[[0,1],[1,1],[2,1],[3,1],[2,0]], 
-      "VL4R_270":[[0,0],[0,1],[0,2],[0,3],[1,0]],
-      
-      // Shape 13: Diagonal 2 ô (4 hướng rotation)
-      "D2":[[0,0],[1,1]],           // 0°: chéo từ trái-trên xuống phải-dưới
-      "D2_90":[[0,1],[1,0]],         // 90°: chéo từ phải-trên xuống trái-dưới
-      "D2_180":[[0,0],[1,1]],        // 180°: giống 0° (đối xứng)
-      "D2_270":[[0,1],[1,0]]         // 270°: giống 90° (đối xứng)
-   };
+    // Shape 13: Diagonal 2 ô (4 hướng rotation)
+    "D2": decodePiece(
+      "xo",
+      "ox"
+    ),           // 0°: chéo từ trái-trên xuống phải-dưới
+    "D2_90": decodePiece(
+      "ox",
+      "xo"
+    ),         // 90°: chéo từ phải-trên xuống trái-dưới
+    "D2_180": decodePiece(
+      "xo",
+      "ox"
+    ),        // 180°: giống 0° (đối xứng)
+    "D2_270": decodePiece(
+      "ox",
+      "xo"
+    )         // 270°: giống 90° (đối xứng)
+  };
   
      // Piece colors for each rotation
    const PIECE_COLORS = {
-     "1x1":"#ff6b6b", "1x2":"#51cf66", "1x3":"#339af0", "2x2":"#5de4c7",
+     "1x1":"#ff6b6b", "I2":"#51cf66", "2x2":"#5de4c7",
      "I3":"#ffd43b", "I4":"#f783ac", "I5":"#ff6b9b", "L3":"#4c6ef5", "L4":"#ae3ec9",
      "T4":"#ff6b6b", "S4":"#40c057", "Z4":"#e64980", "O3":"#ffa94d",
      
@@ -769,7 +999,7 @@
            "Cross":"#9c27b0", "TR2x2":"#673ab7", "VL4R":"#3f51b5", "T4B":"#ff5722", "D2":"#00bcd4",
      
      // Colors for rotated pieces (same as base)
-     "1x2_90":"#51cf66", "1x3_90":"#339af0", "I3_90":"#ffd43b", "I4_90":"#f783ac",
+     "I2_90":"#51cf66", "I3_90":"#ffd43b", "I4_90":"#f783ac",
      "S4_90":"#40c057", "Z4_90":"#e64980",
      "L3_90":"#4c6ef5", "L3_180":"#4c6ef5", "L3_270":"#4c6ef5",
      "L4_90":"#ae3ec9", "L4_180":"#ae3ec9", "L4_270":"#ae3ec9",
@@ -796,14 +1026,14 @@
   
      // Base weights for all 71 pieces
    const BASE_WEIGHTS = {
-     "1x1":0.02, "1x2":0.05, "1x3":0.06, "2x2":0.07, "L3":0.06, "I4":0.07, "I5":0.07, "L4":0.07, "T4":0.06, "S4":0.06, "Z4":0.06, "O3":0.05, "I3":0.05,
+     "1x1":0.02, "I2":0.05, "2x2":0.07, "L3":0.06, "I4":0.07, "I5":0.07, "L4":0.07, "T4":0.06, "S4":0.06, "Z4":0.06, "O3":0.05, "I3":0.05,
      
      // New pieces weights
 "R2x3":0.06, "L2x2":0.06, "U5":0.06, "R2x2R":0.06, "TL2x2":0.06,
            "Cross":0.06, "TR2x2":0.06, "VL4R":0.06, "T4B":0.06, "D2":0.03,
      
      // Weights for rotated pieces (same as base)
-     "1x2_90":0.05, "1x3_90":0.06, "I3_90":0.05, "I4_90":0.07, "I5_90":0.07, "S4_90":0.06, "Z4_90":0.06,
+     "I2_90":0.05, "I3_90":0.05, "I4_90":0.07, "I5_90":0.07, "S4_90":0.06, "Z4_90":0.06,
      "L3_90":0.06, "L3_180":0.06, "L3_270":0.06, "L4_90":0.07, "L4_180":0.07, "L4_270":0.07,
      "T4_90":0.06, "T4_180":0.06, "T4_270":0.06,
      
@@ -1278,7 +1508,7 @@ function drawBombTexts() {
       // Cross clear detected!
       let crossSize = clearedRows.length * clearedCols.length;
       if(crossSize === 1) crossBonus = 3;        // 1x1 cross: -3 durability
-      else if(crossSize === 2) crossBonus = 4;   // 2x1 or 1x2 cross: -4 durability
+      else if(crossSize === 2) crossBonus = 4;   // 2x1 or I2 cross: -4 durability
       else if(crossSize === 4) crossBonus = 6;   // 2x2 cross: -6 durability
       else if(crossSize >= 6) crossBonus = 999;  // 2x3 or 3x2+ cross: clear all!
     }

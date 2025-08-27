@@ -1,6 +1,6 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.8.1  
+**Phiên bản:** v1.8.4  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
@@ -37,7 +37,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 ## 🎯 Tính Năng Chính
 
 ### 🧩 Hệ Thống Khối
-- **32 Loại Khối**: Bao gồm tất cả hướng xoay (0°, 90°, 180°, 270°)
+- **71 Loại Khối**: Bao gồm tất cả hướng xoay (0°, 90°, 180°, 270°)
 - **Pool 3 Khối**: Chọn khối từ 3 khối có sẵn
 - **Hold System**: Lưu 1 khối (CD 3 lượt)
 - **Swap System**: Đổi khối cứu nạn (CD 9 lượt)
@@ -100,7 +100,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 
 ### 🎲 Game Mechanics
 - **Bàn chơi**: 8×8 ô
-- **Khối tối đa**: 32 loại với 4 hướng xoay
+- **Khối tối đa**: 71 loại với 4 hướng xoay
 - **Pool size**: 3 khối
 - **Bonus pieces**: Tối đa 4 ô trên bàn
 - **Durable pieces**: 6-12 ô với độ bền 2-5
@@ -122,6 +122,18 @@ Nếu gặp vấn đề, vui lòng:
 4. Tạo Pull Request
 
 ## 📜 Lịch Sử Phiên Bản
+
+### v1.8.4 (19/12/2024)
+- 🐛 Sửa lỗi duplicate piece names gây overwrite
+- 🔧 Cập nhật piece count chính xác từ 44 → 71 pieces
+- 🎯 Sửa Cross shape rotations để có 4 hướng khác nhau
+- 📝 Cập nhật documentation và debug info
+
+### v1.8.3 (19/12/2024)
+- ✨ Thêm 12 pieces mới với 4 hướng xoay mỗi loại
+- 🧩 Tổng cộng 71 pieces (tăng từ 32)
+- 🎨 Màu sắc riêng biệt cho từng loại piece mới
+- 🔧 Cải thiện hệ thống sinh piece và rotation
 
 ### v1.8.0 (19/12/2024)
 - ✨ Thêm hệ thống game modes hoàn chỉnh với 4 chế độ chơi

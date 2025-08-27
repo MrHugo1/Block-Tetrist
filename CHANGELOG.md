@@ -1,5 +1,25 @@
 # Block Tetrist - Changelog
 
+## [v1.8.4] - 2024-12-19
+### 🐛 Bug Fixes
+- **Fixed Duplicate Piece Names**: Resolved naming conflicts that caused pieces to overwrite each other
+- **Corrected Piece Count**: Updated from incorrect "44 pieces" to accurate "71 pieces" total
+- **Fixed Cross Shape Rotations**: Cross shape now has 4 distinct rotation variants instead of identical copies
+- **Resolved Naming Conflicts**: 
+  - T3 → T6 (6-cell T-shape)
+  - R2x2 → R2x2R (2x2 + right extension)
+  - T4 duplicate → T4B (4-cell T-shape variant)
+
+### 🔧 Technical Improvements
+- **Unique Piece Identifiers**: All pieces now have distinct names to prevent overwriting
+- **Accurate Documentation**: Updated comments and debug info to reflect correct piece count
+- **Proper Rotation Variants**: Fixed Cross shape to have meaningful rotation differences
+
+### 📝 Documentation
+- **Updated Version Number**: From v1.8.3 to v1.8.4
+- **Corrected Piece Count**: Debug info now shows accurate "Total Pieces: 71"
+- **Enhanced Comments**: Updated PIECES object comment to reflect actual piece count
+
 ## [v1.8.1] - 2024-12-19
 ### 🐛 Bug Fixes
 - **Fixed Bomb in Basic Mode**: Bomb pieces no longer appear or function in Basic Mode

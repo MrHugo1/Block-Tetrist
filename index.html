@@ -301,6 +301,323 @@
      .game-over-title { font-size: 16px; }
   }
   
+  /* Mobile Portrait Orientation */
+  @media (max-width: 768px) and (orientation: portrait) {
+    #wrap { 
+      padding: 8px; 
+      gap: 8px; 
+    }
+    
+    .header {
+      margin-bottom: 10px;
+    }
+    
+    .header h1 { 
+      font-size: 20px; 
+      margin-bottom: 4px;
+    }
+    
+    .header .subtitle { 
+      font-size: 14px; 
+      margin: 4px 0 0;
+    }
+    
+    /* Adjust canvas size for mobile portrait */
+    canvas {
+      width: 100vw !important;
+      height: auto !important;
+      max-width: 400px;
+      max-height: 500px;
+      border-radius: 12px;
+    }
+    
+    /* Mobile-optimized stats display */
+    .stats-display {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+      justify-content: center;
+    }
+    
+    .stat-item {
+      min-width: 80px;
+      padding: 8px 12px;
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .stat-value {
+      font-size: 18px;
+    }
+    
+    .stat-label {
+      font-size: 10px;
+    }
+    
+    /* Mobile-optimized cards */
+    .card {
+      min-width: 100%;
+      padding: 12px 16px;
+      margin: 8px 0;
+    }
+    
+    /* Mobile-optimized controls info */
+    .controls-info {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .control-group {
+      padding: 12px;
+    }
+    
+    .control-group h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    /* Mobile-optimized high score display */
+    .high-score-display {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin: 10px auto;
+      max-width: 100%;
+      padding: 12px;
+    }
+    
+    .high-score-display h3 {
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .high-score-item {
+      font-size: 11px;
+      margin: 4px 0;
+    }
+    
+    /* Mobile-optimized version and debug */
+    .version {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin: 10px auto;
+      text-align: center;
+      font-size: 10px;
+    }
+    
+    .debug {
+      position: relative;
+      top: auto;
+      right: auto;
+      margin: 10px auto;
+      max-width: 100%;
+      font-size: 10px;
+      padding: 6px 8px;
+    }
+    
+    /* Mobile-optimized game over overlay */
+    .game-over-text {
+      padding: 16px;
+      min-width: 90vw;
+      max-width: 300px;
+    }
+    
+    .game-over-title {
+      font-size: 16px;
+    }
+    
+    /* Mobile-optimized mode selector */
+    .mode-selector-content {
+      padding: 16px;
+      margin: 16px;
+      max-width: 90vw;
+    }
+    
+    .mode-selector h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .mode-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    
+    .mode-button {
+      min-height: 100px;
+      padding: 16px;
+    }
+    
+    .mode-icon {
+      font-size: 24px;
+    }
+    
+    .mode-title {
+      font-size: 16px;
+    }
+    
+    .mode-desc {
+      font-size: 11px;
+    }
+    
+    .mode-highscore {
+      font-size: 10px;
+    }
+    
+    /* Mobile touch-friendly buttons */
+    button {
+      padding: 14px 20px;
+      font-size: 16px;
+      min-height: 44px; /* iOS touch target minimum */
+    }
+    
+    /* Mobile-optimized combo text */
+    .combo-text {
+      font-size: 32px;
+    }
+  }
+  
+  /* Mobile Controls */
+  .mobile-controls {
+    display: none;
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(43, 51, 92, 0.3);
+    border-radius: 16px;
+    border-left: 4px solid #5de4c7;
+  }
+  
+  .mobile-controls-title h3 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    color: #5de4c7;
+    text-align: center;
+  }
+  
+  .mobile-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  
+  .mobile-control-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: linear-gradient(145deg, #2a3156, #3a4376);
+    border: 2px solid #2a3156;
+    border-radius: 12px;
+    color: #E8EBF7;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 60px;
+  }
+  
+  .mobile-control-btn:hover {
+    border-color: #5de4c7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(93, 228, 199, 0.3);
+  }
+  
+  .mobile-control-btn:active {
+    transform: translateY(0);
+  }
+  
+  .mobile-control-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  
+  .mobile-control-text {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .mobile-control-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  /* Show mobile controls on mobile */
+  @media (max-width: 768px) and (orientation: portrait) {
+    .mobile-controls {
+      display: block;
+    }
+    
+    .mobile-controls-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* Extra small mobile devices */
+  @media (max-width: 480px) and (orientation: portrait) {
+    #wrap { 
+      padding: 4px; 
+      gap: 6px; 
+    }
+    
+    .header h1 { 
+      font-size: 18px; 
+    }
+    
+    .header .subtitle { 
+      font-size: 12px; 
+    }
+    
+    .stats-display {
+      gap: 6px;
+    }
+    
+    .stat-item {
+      padding: 6px 8px;
+    }
+    
+    .stat-value {
+      font-size: 16px;
+    }
+    
+    .stat-label {
+      font-size: 9px;
+    }
+    
+    .card {
+      padding: 10px 12px;
+    }
+    
+    .control-group {
+      padding: 10px;
+    }
+    
+    .control-group h3 {
+      font-size: 13px;
+    }
+    
+    .mobile-controls-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    
+    .mobile-control-btn {
+      padding: 10px 6px;
+      min-height: 50px;
+    }
+    
+    .mobile-control-icon {
+      font-size: 18px;
+    }
+    
+    .mobile-control-text {
+      font-size: 10px;
+    }
+  }
+  
   /* Game Mode Selector Styles */
   .mode-selector {
     position: absolute;
@@ -447,7 +764,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.15</div>
+     <div class="version">v1.9.16</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -598,20 +915,112 @@
       <p>Ô bonus tự biến mất sau 2-4 lượt</p>
     </div>
   </div>
+  
+  <!-- Mobile Controls -->
+  <div class="mobile-controls" id="mobile-controls" style="display: none;">
+    <div class="mobile-controls-title">
+      <h3>📱 Điều Khiển Mobile</h3>
+    </div>
+    <div class="mobile-controls-grid">
+      <button class="mobile-control-btn" id="hold-btn" data-action="hold">
+        <span class="mobile-control-icon">💾</span>
+        <span class="mobile-control-text">Hold</span>
+      </button>
+      <button class="mobile-control-btn" id="swap1-btn" data-action="swap1">
+        <span class="mobile-control-icon">🔄</span>
+        <span class="mobile-control-text">Swap 1</span>
+      </button>
+      <button class="mobile-control-btn" id="swap2-btn" data-action="swap2">
+        <span class="mobile-control-icon">🔄</span>
+        <span class="mobile-control-text">Swap 2</span>
+      </button>
+      <button class="mobile-control-btn" id="swap3-btn" data-action="swap3">
+        <span class="mobile-control-icon">🔄</span>
+        <span class="mobile-control-text">Swap 3</span>
+      </button>
+      <button class="mobile-control-btn" id="deselect-btn" data-action="deselect">
+        <span class="mobile-control-icon">❌</span>
+        <span class="mobile-control-text">Bỏ chọn</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
 (function(){
-  const W = 720, H = 900;
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
+  // Responsive canvas setup
+  let W = 720, H = 900;
+  let canvas = document.getElementById('game');
+  let ctx = canvas.getContext('2d');
+  
+  // Mobile responsive variables
+  let isMobile = false;
+  let mobileScale = 1;
+  let mobileOffsetX = 0;
+  let mobileOffsetY = 0;
 
   // Layout
   const BOARD_SIZE = 8;
-  const CELL = 60; // cell px
-  const BOARD_X = (W - CELL*BOARD_SIZE)/2; // center
-  const BOARD_Y = 40;
-  const POOL_Y = 620;
+  let CELL = 60; // cell px - will be adjusted for mobile
+  let BOARD_X = (W - CELL*BOARD_SIZE)/2; // center
+  let BOARD_Y = 40;
+  let POOL_Y = 620;
+  
+  // Initialize responsive canvas
+  function initResponsiveCanvas() {
+    const viewport = window.visualViewport || window;
+    const isPortrait = window.innerHeight > window.innerWidth;
+    
+    if (window.innerWidth <= 768 && isPortrait) {
+      isMobile = true;
+      mobileScale = Math.min(window.innerWidth / 720, window.innerHeight / 900);
+      
+      // Adjust canvas size for mobile
+      canvas.style.width = (720 * mobileScale) + 'px';
+      canvas.style.height = (900 * mobileScale) + 'px';
+      
+      // Adjust cell size and positions for mobile
+      CELL = Math.floor(60 * mobileScale);
+      BOARD_X = (720 * mobileScale - CELL * BOARD_SIZE) / 2;
+      BOARD_Y = 40 * mobileScale;
+      POOL_Y = 620 * mobileScale;
+      
+      // Show mobile controls
+      const mobileControls = document.getElementById('mobile-controls');
+      if (mobileControls) {
+        mobileControls.style.display = 'block';
+      }
+      
+      console.log(`Mobile mode: scale=${mobileScale}, cell=${CELL}, boardX=${BOARD_X}, boardY=${BOARD_Y}`);
+    } else {
+      isMobile = false;
+      mobileScale = 1;
+      
+      // Reset to desktop size
+      canvas.style.width = '720px';
+      canvas.style.height = '900px';
+      
+      CELL = 60;
+      BOARD_X = (W - CELL*BOARD_SIZE)/2;
+      BOARD_Y = 40;
+      POOL_Y = 620;
+      
+      // Hide mobile controls
+      const mobileControls = document.getElementById('mobile-controls');
+      if (mobileControls) {
+        mobileControls.style.display = 'none';
+      }
+    }
+  }
+  
+  // Handle window resize
+  window.addEventListener('resize', initResponsiveCanvas);
+  window.addEventListener('orientationchange', () => {
+    setTimeout(initResponsiveCanvas, 100);
+  });
+  
+  // Initialize canvas on load
+  initResponsiveCanvas();
 
   // Tuning
   const scoring = {
@@ -1233,6 +1642,48 @@
       highScore = score;
       saveHighScore(currentGameMode, score);
     }
+    
+    // Update mobile controls state
+    updateMobileControls();
+  }
+  
+  function updateMobileControls() {
+    if (!isMobile) return;
+    
+    // Update hold button
+    const holdBtn = document.getElementById('hold-btn');
+    holdBtn.disabled = selected.index < 0 || hold.piece || hold.cd > 0;
+    holdBtn.innerHTML = `
+      <span class="mobile-control-icon">💾</span>
+      <span class="mobile-control-text">Hold ${hold.cd > 0 ? `(CD: ${hold.cd})` : ''}</span>
+    `;
+    
+    // Update swap buttons
+    const swap1Btn = document.getElementById('swap1-btn');
+    const swap2Btn = document.getElementById('swap2-btn');
+    const swap3Btn = document.getElementById('swap3-btn');
+    
+    swap1Btn.disabled = swapCD > 0;
+    swap2Btn.disabled = swapCD > 0;
+    swap3Btn.disabled = swapCD > 0;
+    
+    const swapText = swapCD > 0 ? `(CD: ${swapCD})` : '';
+    swap1Btn.innerHTML = `
+      <span class="mobile-control-icon">🔄</span>
+      <span class="mobile-control-text">Swap 1 ${swapText}</span>
+    `;
+    swap2Btn.innerHTML = `
+      <span class="mobile-control-icon">🔄</span>
+      <span class="mobile-control-text">Swap 2 ${swapText}</span>
+    `;
+    swap3Btn.innerHTML = `
+      <span class="mobile-control-icon">🔄</span>
+      <span class="mobile-control-text">Swap 3 ${swapText}</span>
+    `;
+    
+    // Update deselect button
+    const deselectBtn = document.getElementById('deselect-btn');
+    deselectBtn.disabled = selected.index < 0;
   }
   
   function checkGameOver() {
@@ -1869,10 +2320,56 @@ function drawBombTexts() {
   }
 
   canvas.addEventListener('contextmenu', e=>e.preventDefault());
+  
+  // Touch controls for mobile
+  canvas.addEventListener('touchstart', (e)=>{
+    e.preventDefault();
+    if(e.touches.length === 1) {
+      let rect = canvas.getBoundingClientRect();
+      let touch = e.touches[0];
+      let x = touch.clientX - rect.left;
+      let y = touch.clientY - rect.top;
+      
+      // Handle touch as left click
+      handleCanvasClick(x, y, 0);
+    }
+  }, { passive: false });
+  
+  // Long press for right click (deselect)
+  let touchTimer = null;
+  canvas.addEventListener('touchstart', (e)=>{
+    e.preventDefault();
+    touchTimer = setTimeout(() => {
+      selected.index = -1;
+      render();
+    }, 500); // 500ms for long press
+  }, { passive: false });
+  
+  canvas.addEventListener('touchend', (e)=>{
+    if(touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  });
+  
+  canvas.addEventListener('touchmove', (e)=>{
+    if(touchTimer) {
+      clearTimeout(touchTimer);
+      touchTimer = null;
+    }
+  });
+  
+  // Mouse controls
   canvas.addEventListener('mousedown', (e)=>{
     let rect=canvas.getBoundingClientRect();
     let x=e.clientX-rect.left, y=e.clientY-rect.top;
     if(e.button===2){ selected.index=-1; render(); return; }
+    
+    handleCanvasClick(x, y, e.button);
+  });
+  
+  // Unified click handler for both mouse and touch
+  function handleCanvasClick(x, y, button) {
 
     // If clicking pool slot -> select piece
           let slot = poolSlotAt(x,y);
@@ -2003,7 +2500,7 @@ function drawBombTexts() {
         }
       }
     }
-  });
+  } // End of handleCanvasClick function
 
   // UI buttons via keys for simplicity
   window.addEventListener('keydown', (e)=>{
@@ -2426,6 +2923,70 @@ function drawBombTexts() {
         const mode = this.getAttribute('data-mode');
         selectGameMode(mode);
       });
+    });
+    
+    // Mobile controls event listeners
+    document.getElementById('hold-btn').addEventListener('click', function() {
+      if(selected.index >= 0 && !hold.piece && hold.cd <= 0) {
+        hold.piece = pool[selected.index];
+        pool[selected.index] = null;
+        hold.cd = holdCfg.cdTurns;
+        selected.index = -1;
+        
+        // Auto refill if pool is empty
+        if(pool.every(p => p === null)) {
+          refillPool();
+        } else {
+          render();
+        }
+      }
+    });
+    
+    document.getElementById('swap1-btn').addEventListener('click', function() {
+      if(swapCD <= 0) {
+        let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+        pool[0] = makePiece(rk);
+        swapCD = swapCfg.cdTurns;
+        
+        // Check for game over after swap
+        if(checkGameOver()) {
+          gameOver = true;
+        }
+        render();
+      }
+    });
+    
+    document.getElementById('swap2-btn').addEventListener('click', function() {
+      if(swapCD <= 0) {
+        let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+        pool[1] = makePiece(rk);
+        swapCD = swapCfg.cdTurns;
+        
+        // Check for game over after swap
+        if(checkGameOver()) {
+          gameOver = true;
+        }
+        render();
+      }
+    });
+    
+    document.getElementById('swap3-btn').addEventListener('click', function() {
+      if(swapCD <= 0) {
+        let rk = swapCfg.rescueSet[Math.floor(rnd()*swapCfg.rescueSet.length)];
+        pool[2] = makePiece(rk);
+        swapCD = swapCfg.cdTurns;
+        
+        // Check for game over after swap
+        if(checkGameOver()) {
+          gameOver = true;
+        }
+        render();
+      }
+    });
+    
+    document.getElementById('deselect-btn').addEventListener('click', function() {
+      selected.index = -1;
+      render();
     });
     
     // Initialize high score display

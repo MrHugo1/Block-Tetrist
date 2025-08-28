@@ -1,5 +1,40 @@
 # Block Tetrist - Changelog
 
+## [v1.9.16] - 2024-12-19
+### ✨ Mobile Support & Responsive Design
+- **Mobile Portrait Orientation**: Full support for mobile devices in portrait mode
+- **Responsive Canvas**: Canvas automatically scales to fit mobile screens
+- **Touch Controls**: Touch-friendly controls with long-press for right-click
+- **Mobile Controls Panel**: Virtual buttons for Hold, Swap, and Deselect actions
+- **Responsive Layout**: All UI elements adapt to mobile screen sizes
+- **Touch-Friendly Buttons**: Minimum 44px touch targets for iOS compatibility
+
+### 🎮 Mobile Gameplay Features
+- **Touch Piece Selection**: Tap pool slots to select pieces
+- **Touch Piece Placement**: Tap board cells to place selected pieces
+- **Long Press Deselect**: 500ms long press to deselect pieces (replaces right-click)
+- **Virtual Control Buttons**: 
+  - Hold button with cooldown display
+  - Swap buttons (1/2/3) with cooldown display
+  - Deselect button for clearing selection
+- **Mobile-Optimized UI**: Smaller fonts, compact layouts, touch-friendly spacing
+
+### 📱 Responsive Design Improvements
+- **Breakpoint System**: 768px for tablets, 480px for small phones
+- **Orientation Detection**: Automatic layout adjustment for portrait/landscape
+- **Scalable Canvas**: Maintains game proportions across all screen sizes
+- **Mobile-First CSS**: Progressive enhancement from mobile to desktop
+- **Touch Event Handling**: Prevents default touch behaviors for better control
+
+### 🔧 Technical Enhancements
+- **Responsive Canvas System**: Dynamic scaling based on screen size
+- **Touch Event Management**: Unified click/touch handling system
+- **Mobile State Management**: Automatic show/hide of mobile controls
+- **Performance Optimization**: Efficient canvas scaling for mobile devices
+- **Cross-Platform Compatibility**: Works on iOS, Android, and desktop browsers
+
+---
+
 ## [v1.9.15] - 2024-12-19
 ### 🔧 Technical Improvements
 - **Enhanced Piece Format**: Changed from space-based to "o"-based empty cell representation

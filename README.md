@@ -1,6 +1,6 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.8.4  
+**Phiên bản:** v1.9.16  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
@@ -62,6 +62,12 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - **Phím H**: Hold khối đang chọn
 - **Phím 1/2/3**: Swap khối slot tương ứng
 
+### 📱 **Mobile Controls (Mới!)**
+- **Touch**: Tap để chọn và đặt khối
+- **Long Press**: Giữ 500ms để bỏ chọn khối
+- **Virtual Buttons**: Hold, Swap 1/2/3, Deselect
+- **Responsive**: Tự động điều chỉnh cho màn hình dọc
+
 ### 🎯 Mục Tiêu
 - Đặt khối để tạo thành hàng/cột hoàn chỉnh
 - Clear càng nhiều line càng tốt
@@ -77,11 +83,18 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - Trình duyệt web hiện đại (Chrome, Firefox, Safari, Edge)
 - Hỗ trợ HTML5 Canvas
 - JavaScript enabled
+- **Mobile**: iOS Safari 12+, Chrome Mobile 70+, Samsung Internet 10+
 
 ### 🚀 Chạy Game
 1. Tải file `index.html`
 2. Mở bằng trình duyệt web
 3. Bắt đầu chơi ngay lập tức!
+
+### 📱 **Mobile Gaming**
+- **Portrait Mode**: Tối ưu cho màn hình dọc
+- **Touch Controls**: Điều khiển bằng ngón tay
+- **Responsive Design**: Tự động điều chỉnh kích thước
+- **Virtual Buttons**: Nút điều khiển ảo cho mobile
 
 ### 🧪 Test Bonus System
 - Mở file `test.html` để kiểm tra hệ thống bonus

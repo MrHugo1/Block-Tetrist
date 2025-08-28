@@ -1,13 +1,15 @@
 # Block Tetrist - Changelog
 
-## v1.9.19-critical-fix (Latest)
-**CRITICAL FIXES APPLIED** - Fixed JavaScript syntax errors that were preventing the game from working
+## v1.9.20-structure-fix (Latest)
+**CRITICAL STRUCTURE FIXES APPLIED** - Fixed JavaScript structural errors that were preventing the game from working
 
 ### 🚨 Critical Issues Fixed:
-- **JavaScript Syntax Error**: Fixed broken DOMContentLoaded event listener structure
-- **Missing Function Calls**: Restored showModeSelector() call at startup that was outside the event scope
-- **Code Structure**: Fixed missing closing braces and improper indentation that caused script failure
-- **Event Listener Scope**: All mode selection buttons now properly attached to DOM events
+- **JavaScript Structure Error**: Fixed malformed `DOMContentLoaded` event listener structure
+- **Function Closure**: Corrected `explodeBomb` function missing closing brace  
+- **Code Organization**: Fixed code placement outside of proper function scope
+- **Event Listener**: Restored proper `showModeSelector()` call at startup
+- **Game Initialization**: Fixed game boot sequence and pool initialization
+- **IIFE Structure**: Corrected Immediately Invoked Function Expression closure
 
 ### ✅ What Now Works:
 - Game mode selector displays immediately when page loads

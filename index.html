@@ -613,7 +613,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.19-critical-fix</div>
+             <div class="version">v1.9.20-structure-fix</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -2810,8 +2810,8 @@ function drawBombTexts() {
   console.log(`Bomb exploded, score added: +${explosionScore}, bomb pieces remaining: ${bombPieces.length}`);
 }
 
-  // Event Listeners for Game Mode System
-  document.addEventListener('DOMContentLoaded', function() {
+// Event Listeners for Game Mode System
+document.addEventListener('DOMContentLoaded', function() {
     // Mode selector buttons
     document.querySelectorAll('.mode-button[data-mode]').forEach(button => {
       button.addEventListener('click', function() {

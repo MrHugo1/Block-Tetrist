@@ -707,9 +707,9 @@
       "xxo"
     ), 
     "S4_90": decodePiece(
-      "ox",
+      "xo",
       "xx",
-      "xo"
+      "ox"
     ),
     "Z4": decodePiece(
       "xxo",
@@ -718,7 +718,7 @@
     "Z4_90": decodePiece(
       "ox",
       "xx",
-      "ox"
+      "xo"
     ),
     
     // 2x2, O3 - 1 direction (symmetric)
@@ -755,8 +755,8 @@
       "xx"
     ), 
     "L4_90": decodePiece(
-      "oox",
-      "xxx"
+      "xxx",
+      "xoo"
     ), 
     "L4_180": decodePiece(
       "xx",
@@ -764,8 +764,26 @@
       "ox"
     ), 
     "L4_270": decodePiece(
+      "oox",
+      "xxx"
+    ),
+    "L4R": decodePiece(
+      "ox",
+      "ox",
+      "xx"
+    ), 
+    "L4_90": decodePiece(
+      "xoo",
+      "xxx"
+    ), 
+    "L4_180": decodePiece(
+      "xx",
+      "xo",
+      "xo"
+    ), 
+    "L4_270": decodePiece(
       "xxx",
-      "xoo"
+      "oox"
     ),
     "T4": decodePiece(
       "xxx",
@@ -781,12 +799,52 @@
       "xxx"
     ), 
     "T4_270": decodePiece(
-      "ox",
+      "xo",
       "xx",
-      "ox"
+      "xo"
     ),
     
-    // New pieces from image - 4 directions each (0°, 90°, 180°, 270°)
+    "T5": decodePiece(
+      "xxx",
+      "oxo",
+      "oxo"
+    ), 
+    "T5_90": decodePiece(
+      "oox",
+      "xxx",
+      "oox"
+    ), 
+    "T5_180": decodePiece(
+      "oxo",
+      "oxo",
+      "xxx"
+    ), 
+    "T5_270": decodePiece(
+      "xoo",
+      "xxx",
+      "xoo"
+    ),
+    "C5": decodePiece(
+      "xxx",
+      "xoo",
+      "xoo"
+    ), 
+    "C5_90": decodePiece(
+      "oox",
+      "oox",
+      "xxx"
+    ), 
+    "C5_180": decodePiece(
+      "xoo",
+      "xoo",
+      "xxx"
+    ), 
+    "C5_270": decodePiece(
+      "xxx",
+      "oox",
+      "oox"
+    ),
+
     // Shape 1: 2x3 rectangle
     "R2x3": decodePiece(
       "xxx",
@@ -797,15 +855,7 @@
       "xx",
       "xx"
     ), 
-    "R2x3_180": decodePiece(
-      "xxx",
-      "xxx"
-    ), 
-    "R2x3_270": decodePiece(
-      "xx",
-      "xx",
-      "xx"
-    ),
+
     
     // Shape 1.5: I5 - 5 ô thẳng (2 hướng)
     "I5": decodePiece(
@@ -817,25 +867,7 @@
     ), 
     "I5_90": decodePiece("xxxxx"),
     
-    // Shape 4: 2x2 + left extension
-    "L2x2": decodePiece(
-      "xo",
-      "xx",
-      "xo"
-    ), 
-    "L2x2_90": decodePiece(
-      "oox",
-      "xxx"
-    ), 
-    "L2x2_180": decodePiece(
-      "ox",
-      "xx",
-      "ox"
-    ), 
-    "L2x2_270": decodePiece(
-      "xxx",
-      "oox"
-    ),
+
     
     // Shape 5.5: U5 - U shape 5 ô (4 hướng rotation)
     "U5": decodePiece(
@@ -852,9 +884,31 @@
       "xox"
     ),        // 180°: U shape ngang đảo
     "U5_270": decodePiece(
-      "ox",
       "xx",
-      "ox"
+      "ox",
+      "xx"
+    ),        // 270°: U shape dọc đảo
+
+    // Shape U7 - U shape 7 ô
+    "U7": decodePiece(
+      "xox",
+      "xox",
+      "xxx"
+    ),           // 0°: U shape ngang
+    "U7_90": decodePiece(
+      "xxx",
+      "xoo",
+      "xxx"
+    ),         // 90°: U shape dọc
+    "U7_180": decodePiece(
+      "xxx",
+      "xox",
+      "xox"
+    ),        // 180°: U shape ngang đảo
+    "U7_270": decodePiece(
+      "xxx",
+      "oox",
+      "xxx"
     ),        // 270°: U shape dọc đảo
      
     // Shape 6: 2x2 + right extension
@@ -864,39 +918,39 @@
       "ox"
     ), 
     "R2x2R_90": decodePiece(
-      "oox",
-      "xxx"
+      "xxx",
+      "xxo"
     ), 
     "R2x2R_180": decodePiece(
-      "ox",
+      "xo",
       "xx",
       "xx"
     ), 
     "R2x2R_270": decodePiece(
-      "xxx",
-      "xoo"
+      "oxx",
+      "xxx"
     ),
      
-    // Shape 7: 2x2 + top-left extension
-    "TL2x2": decodePiece(
-      "oxx",
-      "oxx",
-      "xoo"
+
+    // Shape 7: 
+
+    "V3": decodePiece(
+      "xox",
+      "oxo"
     ), 
-    "TL2x2_90": decodePiece(
-      "xoo",
-      "xx",
-      "xx"
+    "V3_90": decodePiece(
+      "xo",
+      "ox",
+      "xo"
     ), 
-    "TL2x2_180": decodePiece(
-      "oox",
-      "xx",
-      "xx"
+    "V3_180": decodePiece(
+      "ox",
+      "xo",
+      "ox"
     ), 
-    "TL2x2_270": decodePiece(
-      "xx",
-      "xx",
-      "oox"
+    "V3_270": decodePiece(
+      "oxo",
+      "xox"
     ),
      
     // Shape 9: Cross shape (1 direction - symmetric)
@@ -905,85 +959,96 @@
       "xxx",
       "oxo"
     ),
-     
-    // Shape 10: T shape (4 cells) - different from existing T4
-    "T4B": decodePiece(
-      "xxx",
-      "oxo"
-    ), 
-    "T4B_90": decodePiece(
-      "ox",
-      "xx",
-      "ox"
-    ), 
-    "T4B_180": decodePiece(
+
+    // Shape 10: Cross shape 1
+    "Cross_1": decodePiece(
+      "xox",
       "oxo",
-      "xxx"
-    ), 
-    "T4B_270": decodePiece(
-      "ox",
-      "xx",
-      "ox"
+      "xox"
     ),
-     
-    // Shape 11: 2x2 + top-right extension
-    "TR2x2": decodePiece(
-      "xx",
-      "xx",
-      "oox"
-    ), 
-    "TR2x2_90": decodePiece(
-      "oox",
-      "xxx"
-    ), 
-    "TR2x2_180": decodePiece(
-      "xoo",
-      "xx",
-      "xx"
-    ), 
-    "TR2x2_270": decodePiece(
-      "xxx",
-      "xoo"
-    ),
+
      
     // Shape 12: Vertical line + right extension
-    "VL4R": decodePiece(
+    "L5": decodePiece(
       "xo",
+      "xo",
+      "xo",
+      "xx"
+    ), 
+    "L5_90": decodePiece(
+      "xxxx",
+      "xooo"
+    ), 
+    "L5_180": decodePiece(
+      "xx",
+      "ox",
+      "ox",
+      "ox"
+    ), 
+    "L5_270": decodePiece(
+      "ooox",
+      "xxxx"
+    ),
+    "L5R": decodePiece(
+      "ox",
+      "ox",
+      "ox",
+      "xx"
+    ), 
+    "L5_90": decodePiece(
+      "xooo",
+      "xxxx"
+    ), 
+    "L5_180": decodePiece(
+      "xx",
       "xo",
       "xo",
       "xo"
     ), 
-    "VL4R_90": decodePiece(
-      "oooox",
-      "xxxx"
+    "L5_270": decodePiece(
+      "xxxx",
+      "ooox"
+    ),
+
+    // Shape 12: Vertical line + right extension
+    "L5T": decodePiece(
+      "xo",
+      "xo",
+      "xx",
+      "xo"
     ), 
-    "VL4R_180": decodePiece(
+    "L5T_90": decodePiece(
+      "xxxx",
+      "oxoo"
+    ), 
+    "L5T_180": decodePiece(
       "ox",
-      "ox",
+      "xx",
       "ox",
       "ox"
     ), 
-    "VL4R_270": decodePiece(
-      "xxxx",
-      "xooo"
-    ),
+    "L5t_270": decodePiece(
+      "ooxo",
+      "xxxx"
       
     // Shape 13: Diagonal 2 ô (4 hướng rotation)
-    "D2": decodePiece(
+    "X2": decodePiece(
       "xo",
       "ox"
     ),           // 0°: chéo từ trái-trên xuống phải-dưới
-    "D2_90": decodePiece(
+    "X2_90": decodePiece(
       "ox",
       "xo"
     ),         // 90°: chéo từ phải-trên xuống trái-dưới
-    "D2_180": decodePiece(
-      "xo",
-      "ox"
+    "X3": decodePiece(
+      "xoo",
+      "oxo",
+      "oox"
     ),        // 180°: giống 0° (đối xứng)
-    "D2_270": decodePiece(
-      "ox",
-      "xo"
+    "X3_90": decodePiece(
+      "oox",
+      "oxo",
+      "xoo"
     )         // 270°: giống 90° (đối xứng)
   };
   

@@ -1,5 +1,34 @@
 # Block Tetrist - Changelog
 
+## [v1.9.15] - 2024-12-19
+### 🔧 Technical Improvements
+- **Enhanced Piece Format**: Changed from space-based to "o"-based empty cell representation
+- **Improved Readability**: Updated piece definitions to use "o" for empty cells (0) and "x" for filled cells (1)
+- **Multi-line Format**: Converted all piece definitions to multi-line format for better visual clarity
+- **Consistent Notation**: All pieces now use consistent "o" and "x" notation throughout
+
+### 📝 Code Quality
+- **Better Visual Representation**: "o" clearly represents empty cells, making piece shapes easier to understand
+- **Enhanced Maintainability**: Multi-line format makes it easier to see piece patterns and modify them
+- **Improved Documentation**: Added clear comments explaining the "o" and "x" format
+- **Cleaner Code**: Eliminated confusion between spaces and actual empty cells
+
+### 🎯 Examples of New Format
+- **Before**: `"L3": decodePiece("x ", "xx")`
+- **After**: `"L3": decodePiece("xo", "xx")`
+- **Before**: `"R2x2R": decodePiece("xx", "xx", " x")`
+- **After**: `"R2x2R": decodePiece("xx", "xx", "ox")`
+
+### 📊 Format Standards
+- **"x"**: Represents filled cells (value 1)
+- **"o"**: Represents empty cells (value 0)
+- **Multi-line**: Each piece definition spans multiple lines for clarity
+- **Consistent**: All 65 pieces follow the same format pattern
+
+---
+
+## [v1.9.14] - 2024-12-19
+
 ## [v1.8.4] - 2024-12-19
 ### 🐛 Bug Fixes
 - **Fixed Duplicate Piece Names**: Resolved naming conflicts that caused pieces to overwrite each other

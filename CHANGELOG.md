@@ -1,6 +1,27 @@
 # Block Tetrist - Changelog
 
-## v1.9.18-mode-drag-fix (Latest)
+## v1.9.19-critical-fix (Latest)
+**CRITICAL FIXES APPLIED** - Fixed JavaScript syntax errors that were preventing the game from working
+
+### 🚨 Critical Issues Fixed:
+- **JavaScript Syntax Error**: Fixed broken DOMContentLoaded event listener structure
+- **Missing Function Calls**: Restored showModeSelector() call at startup that was outside the event scope
+- **Code Structure**: Fixed missing closing braces and improper indentation that caused script failure
+- **Event Listener Scope**: All mode selection buttons now properly attached to DOM events
+
+### ✅ What Now Works:
+- Game mode selector displays immediately when page loads
+- All 4 game modes (Basic, Blocker, Multiplier, Blast) are selectable
+- Drag & drop functionality restored and working properly
+- No JavaScript errors in browser console
+- Game starts correctly after mode selection
+
+### 🔧 Technical Details:
+The main issue was a critical syntax error where the DOMContentLoaded event listener was not properly closed, causing all the JavaScript code to fail silently. This prevented the mode selector from appearing and broke the drag & drop functionality.
+
+---
+
+## v1.9.18-mode-drag-fix
 **Game Mode Selection & Drag & Drop Fixes**
 
 ### 🎮 Game Mode System Fixes

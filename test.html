@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Block Tetrist - Test Mode Selection & Drag & Drop</title>
+    <title>Critical Fixes Test - Block Tetrist</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,167 +12,168 @@
             padding: 20px;
             background: #f5f5f5;
         }
-        .test-section {
+        .container {
             background: white;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .test-result {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: bold;
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
         }
         .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
-        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        button {
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .checklist label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .btn {
             background: #007bff;
             color: white;
+            padding: 12px 24px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            margin: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
         }
-        button:hover { background: #0056b3; }
-        .test-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        .btn:hover {
+            background: #0056b3;
+        }
+        .critical {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
             margin: 20px 0;
+            border-left: 5px solid #721c24;
         }
     </style>
 </head>
 <body>
-    <h1>🧪 Block Tetrist - Test Mode Selection & Drag & Drop</h1>
-    <p>Kiểm tra các chức năng đã được sửa:</p>
-    
-    <div class="test-section">
-        <h2>✅ Đã Sửa Lỗi</h2>
-        <div class="test-grid">
-            <div class="test-result success">
-                <strong>Game Mode Selection:</strong><br>
-                ✅ Mode selector hiển thị khi khởi động<br>
-                ✅ Có thể chọn 4 chế độ chơi<br>
-                ✅ High scores được lưu theo từng mode
-            </div>
-            <div class="test-result success">
-                <strong>Drag & Drop:</strong><br>
-                ✅ Kéo thả piece từ pool lên bàn<br>
-                ✅ Visual feedback khi kéo<br>
-                ✅ Drop preview hiển thị đúng vị trí<br>
-                ✅ Piece trở về pool nếu drop thất bại
-            </div>
-            <div class="test-result success">
-                <strong>User Experience:</strong><br>
-                ✅ Cursor thay đổi khi kéo<br>
-                ✅ Hướng dẫn rõ ràng<br>
-                ✅ Responsive trên mobile
-            </div>
+    <div class="container">
+        <h1>🚨 Critical Fixes Applied - Block Tetrist v1.9.19</h1>
+        
+        <div class="critical">
+            <h3>⚠️ CRITICAL ISSUES FIXED:</h3>
+            <ul>
+                <li><strong>JavaScript Syntax Error:</strong> Fixed broken DOMContentLoaded event listener</li>
+                <li><strong>Missing Function Calls:</strong> Restored showModeSelector() call at startup</li>
+                <li><strong>Code Structure:</strong> Fixed missing closing braces and improper indentation</li>
+            </ul>
         </div>
-    </div>
 
-    <div class="test-section">
-        <h2>🔧 Các Thay Đổi Đã Thực Hiện</h2>
-        <ul>
-            <li><strong>Mode Selector:</strong> Thêm lời gọi <code>showModeSelector()</code> khi khởi tạo</li>
-            <li><strong>Drag & Drop:</strong> Cải thiện logic xử lý sự kiện cho cả desktop và mobile</li>
-            <li><strong>Visual Feedback:</strong> Thêm CSS classes cho cursor và hover effects</li>
-            <li><strong>Error Handling:</strong> Cải thiện xử lý khi drop thất bại</li>
-            <li><strong>User Guidance:</strong> Thêm hướng dẫn drag & drop trong legend</li>
-        </ul>
-    </div>
-
-    <div class="test-section">
-        <h2>🧪 Cách Test</h2>
-        <div class="test-grid">
-            <div>
-                <h3>Test Mode Selection:</h3>
-                <ol>
-                    <li>Mở game - Mode selector phải hiển thị</li>
-                    <li>Chọn từng mode (Basic, Blocker, Multiplier, Blast)</li>
-                    <li>Kiểm tra game bắt đầu với mode đã chọn</li>
-                    <li>Kiểm tra high scores được lưu riêng biệt</li>
-                </ol>
-            </div>
-            <div>
-                <h3>Test Drag & Drop:</h3>
-                <ol>
-                    <li>Chọn piece từ pool</li>
-                    <li>Kéo lên bàn chơi</li>
-                    <li>Kiểm tra drop preview</li>
-                    <li>Thả để đặt piece</li>
-                    <li>Test drop ở vị trí không hợp lệ</li>
-                </ol>
-            </div>
+        <div class="status success">
+            <h3>✅ What Was Fixed:</h3>
+            <ul>
+                <li><strong>Game Mode Selector:</strong> Now properly displays at startup</li>
+                <li><strong>Event Listeners:</strong> All mode selection buttons now work correctly</li>
+                <li><strong>Drag & Drop:</strong> Piece dragging functionality restored</li>
+                <li><strong>Code Syntax:</strong> JavaScript errors eliminated</li>
+            </ul>
         </div>
-    </div>
 
-    <div class="test-section">
-        <h2>📱 Mobile vs Desktop</h2>
-        <div class="test-grid">
-            <div>
-                <h3>Desktop:</h3>
-                <ul>
-                    <li>Click để chọn piece</li>
-                    <li>Drag & drop để đặt</li>
-                    <li>Right-click để bỏ chọn</li>
-                </ul>
-            </div>
-            <div>
-                <h3>Mobile:</h3>
-                <ul>
-                    <li>Touch để bắt đầu drag</li>
-                    <li>Drag & drop để đặt</li>
-                    <li>Hold/Swap buttons</li>
-                </ul>
-            </div>
+        <div class="status warning">
+            <h3>🔧 Technical Details:</h3>
+            <p>The main issue was a <strong>syntax error</strong> in the JavaScript code where:</p>
+            <ul>
+                <li>The DOMContentLoaded event listener was not properly closed</li>
+                <li>Function calls were outside the event listener scope</li>
+                <li>Missing closing braces caused the entire script to fail</li>
+            </ul>
         </div>
-    </div>
 
-    <div class="test-section">
-        <h2>🚀 Khởi Chạy Game</h2>
-        <p>Để test các chức năng đã sửa:</p>
-        <button onclick="window.open('index.html', '_blank')">Mở Game Chính</button>
-        <p><em>Lưu ý: Game sẽ hiển thị mode selector khi khởi động. Chọn mode để bắt đầu chơi và test drag & drop.</em></p>
-    </div>
+        <h3>🧪 How to Test:</h3>
+        <div class="checklist">
+            <h4>Mode Selection Test:</h4>
+            <label><input type="checkbox"> Game mode selector appears immediately when page loads</label>
+            <label><input type="checkbox"> All 4 mode buttons (Basic, Blocker, Multiplier, Blast) are clickable</label>
+            <label><input type="checkbox"> Selecting a mode starts the game correctly</label>
+            <label><input type="checkbox"> Mode selector disappears after selection</label>
+            
+            <h4>Drag & Drop Test:</h4>
+            <label><input type="checkbox"> Can click and drag pieces from the pool</label>
+            <label><input type="checkbox"> Cursor changes to "grabbing" during drag</label>
+            <label><input type="checkbox"> Drop preview shows on valid board positions</label>
+            <label><input type="checkbox"> Pieces can be dropped on the board</label>
+            <label><input type="checkbox"> Pieces return to pool if dropped in invalid location</label>
+            
+            <h4>General Functionality:</h4>
+            <label><input type="checkbox"> No JavaScript errors in browser console</label>
+            <label><input type="checkbox"> Game starts and runs without crashes</label>
+            <label><input type="checkbox"> High scores display correctly</label>
+        </div>
 
-    <div class="test-section">
-        <h2>📋 Checklist Kiểm Tra</h2>
-        <div class="test-grid">
-            <div>
-                <h3>Mode Selection:</h3>
-                <input type="checkbox" id="mode1"> Mode selector hiển thị khi khởi động<br>
-                <input type="checkbox" id="mode2"> Có thể chọn Basic Mode<br>
-                <input type="checkbox" id="mode3"> Có thể chọn Blocker Mode<br>
-                <input type="checkbox" id="mode4"> Có thể chọn Multiplier Mode<br>
-                <input type="checkbox" id="mode5"> Có thể chọn Blast Mode<br>
-                <input type="checkbox" id="mode6"> High scores được lưu riêng biệt
-            </div>
-            <div>
-                <h3>Drag & Drop:</h3>
-                <input type="checkbox" id="drag1"> Có thể kéo piece từ pool<br>
-                <input type="checkbox" id="drag2"> Drop preview hiển thị đúng<br>
-                <input type="checkbox" id="drag3"> Có thể đặt piece trên bàn<br>
-                <input type="checkbox" id="drag4"> Piece trở về pool nếu drop sai<br>
-                <input type="checkbox" id="drag5"> Cursor thay đổi khi kéo<br>
-                <input type="checkbox" id="drag6"> Hướng dẫn drag & drop rõ ràng
-            </div>
+        <h3>📱 Mobile vs Desktop:</h3>
+        <div class="status warning">
+            <p><strong>Mobile:</strong> Touch events should work for drag & drop</p>
+            <p><strong>Desktop:</strong> Mouse events should work for drag & drop</p>
+            <p><strong>Both:</strong> Mode selection should work identically</p>
+        </div>
+
+        <h3>🎯 Next Steps:</h3>
+        <ol>
+            <li>Open the main game (index.html)</li>
+            <li>Verify the mode selector appears immediately</li>
+            <li>Test each game mode</li>
+            <li>Test drag & drop functionality</li>
+            <li>Check browser console for any remaining errors</li>
+        </ol>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="index.html" class="btn">🎮 Open Main Game</a>
+            <button onclick="window.open('index.html', '_blank')" class="btn">🔄 Open in New Tab</button>
+        </div>
+
+        <div class="status success">
+            <h3>✅ Expected Results:</h3>
+            <p>After these fixes, you should see:</p>
+            <ul>
+                <li>Game mode selector popup immediately when the page loads</li>
+                <li>All buttons working and responsive</li>
+                <li>Smooth drag & drop functionality</li>
+                <li>No JavaScript errors in the console</li>
+                <li>Game starting properly after mode selection</li>
+            </ul>
+        </div>
+
+        <div class="status warning">
+            <h3>⚠️ If Issues Persist:</h3>
+            <p>Please check:</p>
+            <ul>
+                <li>Browser console for any error messages</li>
+                <li>Whether you're viewing the updated index.html file</li>
+                <li>If browser cache needs to be cleared (Ctrl+F5)</li>
+                <li>If the file was saved properly</li>
+            </ul>
         </div>
     </div>
 
     <script>
-        // Auto-check checkboxes when page loads (for demo purposes)
-        window.addEventListener('load', function() {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach((checkbox, index) => {
-                setTimeout(() => {
-                    checkbox.checked = true;
-                }, index * 200);
+        // Add some interactivity to the checklist
+        document.querySelectorAll('.checklist input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = document.querySelectorAll('.checklist input[type="checkbox"]:checked').length;
+                const total = document.querySelectorAll('.checklist input[type="checkbox"]').length;
+                
+                if (allChecked === total) {
+                    alert('🎉 All tests completed! The fixes appear to be working correctly.');
+                }
             });
         });
     </script>

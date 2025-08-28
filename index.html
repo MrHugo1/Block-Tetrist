@@ -566,24 +566,6 @@
     box-shadow: 0 4px 12px rgba(93, 228, 199, 0.3);
   }
   
-  /* Drag and Drop Styles */
-  .piece-dragging {
-    opacity: 0.7;
-    transform: scale(1.1);
-    transition: all 0.2s ease;
-  }
-  
-  .board-drop-zone {
-    position: relative;
-  }
-  
-  .drop-preview {
-    position: absolute;
-    pointer-events: none;
-    z-index: 50;
-    opacity: 0.6;
-  }
-  
   @media (max-width: 768px) {
     .mode-grid {
       grid-template-columns: 1fr;
@@ -631,7 +613,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.18-mode-drag-fix</div>
+     <div class="version">v1.9.19-critical-fix</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -2907,17 +2889,17 @@ function drawBombTexts() {
       });
     }
     
-      // Initialize high score display
-  updateHighScoreDisplay();
+    // Initialize high score display
+    updateHighScoreDisplay();
+    
+    // Show mode selector at startup
+    showModeSelector();
+  });
   
-  // Show mode selector at startup
-  showModeSelector();
-});
-
-// Boot
-if (currentGameMode === 'blocker') {
-  generateDurablePieces();
-}
+  // Boot
+  if (currentGameMode === 'blocker') {
+    generateDurablePieces();
+  }
   
   // Ensure pool starts with 3 pieces
   pool = [null, null, null];

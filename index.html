@@ -556,6 +556,43 @@
     cursor: grabbing !important;
   }
   
+  /* Mobile touch optimizations */
+  @media (max-width: 768px) {
+    canvas {
+      touch-action: none; /* Prevent default touch behaviors */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    .mode-button {
+      touch-action: manipulation; /* Optimize touch response */
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .control-btn {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Performance optimizations for mobile */
+    .mode-selector {
+      will-change: transform;
+      transform: translateZ(0); /* Force hardware acceleration */
+    }
+    
+    .mode-button {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+    
+    .control-btn {
+      will-change: transform;
+      transform: translateZ(0);
+    }
+  }
+  
   .pool-slot-draggable {
     cursor: grab;
     transition: all 0.2s ease;
@@ -613,7 +650,7 @@
 </head>
 <body>
 <div id="wrap">
-             <div class="version">v1.9.20-structure-fix</div>
+             <div class="version">v1.9.22-mobile-fix</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -649,25 +686,25 @@
     <div class="mode-selector-content">
       <h2>🎮 Chọn Chế Độ Chơi</h2>
       <div class="mode-grid">
-        <button class="mode-button" data-mode="basic">
+        <button class="mode-button" data-mode="basic" aria-label="Chọn Basic Mode - Chain multiplier cơ bản">
           <div class="mode-icon">🎯</div>
           <div class="mode-title">Basic Mode</div>
           <div class="mode-desc">Chain multiplier cơ bản</div>
           <div class="mode-highscore">High Score: <span id="basic-highscore">0</span></div>
         </button>
-        <button class="mode-button" data-mode="blocker">
+        <button class="mode-button" data-mode="blocker" aria-label="Chọn Blocker Mode - Durable pieces + Precision bonus">
           <div class="mode-icon">🛡️</div>
           <div class="mode-title">Blocker Mode</div>
           <div class="mode-desc">Durable pieces + Precision bonus</div>
           <div class="mode-highscore">High Score: <span id="blocker-highscore">0</span></div>
         </button>
-        <button class="mode-button" data-mode="multiplier">
+        <button class="mode-button" data-mode="multiplier" aria-label="Chọn Multiplier Mode - Bonus points system">
           <div class="mode-icon">⭐</div>
           <div class="mode-title">Multiplier Mode</div>
           <div class="mode-desc">Bonus points system</div>
           <div class="mode-highscore">High Score: <span id="multiplier-highscore">0</span></div>
         </button>
-        <button class="mode-button" data-mode="blast">
+        <button class="mode-button" data-mode="blast" aria-label="Chọn Blast Mode - Bomb explosion system">
           <div class="mode-icon">💣</div>
           <div class="mode-title">Blast Mode</div>
           <div class="mode-desc">Bomb explosion system</div>
@@ -684,14 +721,14 @@
        <div class="final-score">Điểm: <span id="final-score">0</span></div>
        <div class="current-mode">Mode: <span id="current-mode-display">Basic</span></div>
      </div>
-     <button class="game-over-button" onclick="resetGame()">Chơi Lại</button>
+     <button class="game-over-button" onclick="resetGame()" aria-label="Chơi lại game với mode hiện tại">Chơi Lại</button>
      <div class="other-modes">
        <div class="other-modes-title">Chơi Mode Khác:</div>
        <div class="other-modes-buttons">
-         <button class="other-mode-btn" data-mode="basic">Basic</button>
-         <button class="other-mode-btn" data-mode="blocker">Blocker</button>
-         <button class="other-mode-btn" data-mode="multiplier">Multiplier</button>
-         <button class="other-mode-btn" data-mode="blast">Blast</button>
+         <button class="other-mode-btn" data-mode="basic" aria-label="Chuyển sang Basic Mode">Basic</button>
+         <button class="other-mode-btn" data-mode="blocker" aria-label="Chuyển sang Blocker Mode">Blocker</button>
+         <button class="other-mode-btn" data-mode="multiplier" aria-label="Chuyển sang Multiplier Mode">Multiplier</button>
+         <button class="other-mode-btn" data-mode="blast" aria-label="Chuyển sang Blast Mode">Blast</button>
        </div>
      </div>
    </div>
@@ -717,10 +754,10 @@
   
   <!-- Mobile Touch Controls -->
   <div class="mobile-controls">
-    <button class="control-btn" id="hold-btn" disabled>Hold</button>
-    <button class="control-btn" id="swap1-btn" disabled>Swap 1</button>
-    <button class="control-btn" id="swap2-btn" disabled>Swap 2</button>
-    <button class="control-btn" id="swap3-btn" disabled>Swap 3</button>
+    <button class="control-btn" id="hold-btn" disabled aria-label="Hold khối đang chọn (CD 3 lượt)">Hold</button>
+    <button class="control-btn" id="swap1-btn" disabled aria-label="Đổi khối slot 1 sang khối cứu nạn (CD 9 lượt)">Swap 1</button>
+    <button class="control-btn" id="swap2-btn" disabled aria-label="Đổi khối slot 2 sang khối cứu nạn (CD 9 lượt)">Swap 2</button>
+    <button class="control-btn" id="swap3-btn" disabled aria-label="Đổi khối slot 3 sang khối cứu nạn (CD 9 lượt)">Swap 3</button>
   </div>
   
   <div class="row">
@@ -2894,24 +2931,24 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Show mode selector at startup
     showModeSelector();
-  });
-  
-  // Boot
-  if (currentGameMode === 'blocker') {
-    generateDurablePieces();
-  }
-  
-  // Ensure pool starts with 3 pieces
-  pool = [null, null, null];
-  
-  refillPool();
-  
-  // Double check pool has 3 pieces
-  if(pool.some(p => p === null)) {
+    
+    // Boot - Game initialization AFTER DOM is ready
+    if (currentGameMode === 'blocker') {
+      generateDurablePieces();
+    }
+    
+    // Ensure pool starts with 3 pieces
+    pool = [null, null, null];
+    
     refillPool();
-  }
+    
+    // Double check pool has 3 pieces
+    if(pool.some(p => p === null)) {
+      refillPool();
+    }
 
-  render();
+    render();
+  });
 })();
 </script>
 </body>

@@ -1,21 +1,48 @@
 # Block Tetrist - Changelog
 
-## v1.9.20-structure-fix (Latest)
-**CRITICAL STRUCTURE FIXES APPLIED** - Fixed JavaScript structural errors that were preventing the game from working
+## v1.9.22-mobile-fix (Latest)
+**MOBILE-FOCUSED INITIALIZATION FIX APPLIED** - Fixed critical game initialization order for optimal mobile experience
 
 ### 🚨 Critical Issues Fixed:
-- **JavaScript Structure Error**: Fixed malformed `DOMContentLoaded` event listener structure
-- **Function Closure**: Corrected `explodeBomb` function missing closing brace  
-- **Code Organization**: Fixed code placement outside of proper function scope
-- **Event Listener**: Restored proper `showModeSelector()` call at startup
-- **Game Initialization**: Fixed game boot sequence and pool initialization
-- **IIFE Structure**: Corrected Immediately Invoked Function Expression closure
+- **Game Initialization Order**: Fixed code that was running BEFORE DOM was ready
+- **Mobile Mode Selection**: Corrected mode selector buttons not working on mobile devices
+- **Pool Initialization**: Fixed pool setup happening too early, causing mobile touch issues
+- **Render Timing**: Corrected render() call executing before canvas was ready
+
+### ✅ What Now Works on Mobile:
+- Game mode selector displays immediately and is fully functional on mobile
+- All 4 game mode buttons (Basic, Blocker, Multiplier, Blast) are now CLICKABLE on mobile
+- Game initialization happens in correct order after DOM is ready
+- Pool and game state are properly initialized for mobile touch interactions
+- Game starts correctly after mode selection on mobile devices
+
+### 🔧 Technical Details:
+The critical issue was that game initialization code (Boot section, pool setup, render calls) was placed OUTSIDE the DOMContentLoaded event listener but still within the IIFE. This caused the game to attempt initialization BEFORE the HTML DOM was fully loaded and event listeners were properly attached, making mode selection buttons appear but not function on mobile devices.
+
+### 📱 Mobile-Specific Improvements:
+- **Touch Event Readiness**: All touch event listeners now properly attached before game starts
+- **Mobile Control Buttons**: Hold, Swap buttons now functional from game start
+- **Responsive Initialization**: Game adapts to mobile viewport before first render
+- **Touch-Friendly Setup**: Pool and game state optimized for mobile interaction patterns
+- **Touch Performance**: Added `touch-action: none` and hardware acceleration for smooth mobile experience
+- **Accessibility**: Added comprehensive ARIA labels for all mobile buttons and controls
+- **Mobile CSS**: Optimized touch targets, tap highlights, and responsive layouts
+- **Performance**: Hardware acceleration and will-change optimizations for mobile animations
+
+## v1.9.21-init-fix
+**CRITICAL INITIALIZATION FIX APPLIED** - Fixed game initialization order that was preventing mode selection from working
+
+### 🚨 Critical Issues Fixed:
+- **Game Initialization Order**: Fixed code that was running BEFORE DOM was ready
+- **Pool Initialization**: Corrected pool setup that was happening too early
+- **Render Timing**: Fixed render() call that was executing before canvas was ready
+- **Game State**: Corrected game state initialization sequence
 
 ### ✅ What Now Works:
 - Game mode selector displays immediately when page loads
-- All 4 game modes (Basic, Blocker, Multiplier, Blast) are selectable
-- Drag & drop functionality restored and working properly
-- No JavaScript errors in browser console
+- All 4 game modes (Basic, Blocker, Multiplier, Blast) are now CLICKABLE
+- Game initialization happens in correct order after DOM is ready
+- Pool and game state are properly initialized
 - Game starts correctly after mode selection
 
 ### 🔧 Technical Details:

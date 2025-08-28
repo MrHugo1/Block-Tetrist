@@ -593,7 +593,7 @@
 </head>
 <body>
 <div id="wrap">
-           <div class="version">v1.9.18-mobile</div>
+           <div class="version">v1.9.19-mobile</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -1406,9 +1406,17 @@
     if (!isMobile) return;
     
       // Update Hold button
-  const holdBtn = document.getElementById('hold-btn');
-  holdBtn.disabled = hold.cd > 0 || selected.index < 0 || hold.piece !== null;
-  holdBtn.textContent = hold.cd > 0 ? `Hold (${hold.cd})` : 'Hold';
+    const holdBtn = document.getElementById('hold-btn');
+    const holdDisabled = hold.cd > 0 || selected.index < 0 || hold.piece !== null;
+    holdBtn.disabled = holdDisabled;
+    holdBtn.textContent = hold.cd > 0 ? `Hold (${hold.cd})` : 'Hold';
+    
+    console.log('Hold button state updated:', { 
+      holdCD: hold.cd, 
+      selectedIndex: selected.index, 
+      holdPiece: hold.piece, 
+      disabled: holdDisabled 
+    });
     
     // Update Swap buttons
     const swap1Btn = document.getElementById('swap1-btn');

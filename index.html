@@ -593,7 +593,7 @@
 </head>
 <body>
 <div id="wrap">
-           <div class="version">v1.9.19-mobile</div>
+           <div class="version">v1.9.36-mobile</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -1344,6 +1344,9 @@
     // Update high score display
     updateHighScoreDisplay();
     
+    // Update mobile controls after mode selection
+    updateMobileControls();
+    
     console.log(`Game mode selected: ${mode}`);
   }
   
@@ -1407,7 +1410,8 @@
     
       // Update Hold button
     const holdBtn = document.getElementById('hold-btn');
-    const holdDisabled = hold.cd > 0 || selected.index < 0 || hold.piece !== null;
+    // Button is enabled when: there's a selected piece AND hold slot is empty AND no cooldown
+    const holdDisabled = selected.index < 0 || hold.piece !== null || hold.cd > 0;
     holdBtn.disabled = holdDisabled;
     holdBtn.textContent = hold.cd > 0 ? `Hold (${hold.cd})` : 'Hold';
     
@@ -1496,6 +1500,9 @@
     
     refillPool();
     render();
+    
+    // Update mobile controls after game reset
+    updateMobileControls();
   }
   
   // Make resetGame globally accessible
@@ -1537,11 +1544,21 @@
   
   // Drag & Drop Functions
   function startDrag(piece, startX, startY) {
-    if (!piece || gameOver) return;
+    console.log('startDrag called:', { piece, startX, startY, gameOver, isDragging });
+    
+    if (!piece || gameOver) {
+      console.log('startDrag blocked: no piece or game over');
+      return;
+    }
     
     // Validate piece exists in pool before starting drag
     let pieceIndex = pool.findIndex(p => p === piece);
-    if (pieceIndex === -1) return;
+    if (pieceIndex === -1) {
+      console.log('startDrag blocked: piece not found in pool');
+      return;
+    }
+    
+    console.log('startDrag starting for piece at index:', pieceIndex);
     
     isDragging = true;
     draggedPiece = piece;
@@ -1552,11 +1569,21 @@
     pool[pieceIndex] = null;
     selected.index = -1;
     
+    console.log('startDrag completed, drag state:', { isDragging, draggedPiece, pool });
+    
+    // Update mobile controls after selection change
+    updateMobileControls();
+    
     render();
   }
   
   function updateDrag(currentX, currentY) {
-    if (!isDragging || !draggedPiece) return;
+    if (!isDragging || !draggedPiece) {
+      console.log('updateDrag blocked: not dragging or no dragged piece');
+      return;
+    }
+    
+    console.log('updateDrag:', { currentX, currentY, draggedPiece });
     
     dragOffset = { x: currentX, y: currentY };
     
@@ -1564,12 +1591,14 @@
     let boardPos = gridAt(currentX, currentY);
     if (boardPos && canPlace(draggedPiece, boardPos.r, boardPos.c)) {
       dropPreview = { piece: draggedPiece, r: boardPos.r, c: boardPos.c };
+      console.log('Drop preview created:', dropPreview);
     } else {
       dropPreview = null;
     }
     
     // Ensure drag state consistency
     if (!draggedPiece || !isDragging) {
+      console.log('Drag state inconsistent, ending drag');
       endDrag();
       return;
     }
@@ -1578,9 +1607,16 @@
   }
   
   function endDrag() {
-    if (!isDragging || !draggedPiece) return;
+    console.log('endDrag called:', { isDragging, draggedPiece, dropPreview });
+    
+    if (!isDragging || !draggedPiece) {
+      console.log('endDrag blocked: not dragging or no dragged piece');
+      return;
+    }
     
     if (dropPreview) {
+      console.log('Placing piece on board at:', dropPreview.r, dropPreview.c);
+      
       // Place piece on board
       let placedCells = placePiece(draggedPiece, dropPreview.r, dropPreview.c);
       let cleared = clearLines();
@@ -1651,6 +1687,9 @@
       if(swapCD>0) swapCD--;
       if(hold.cd>0) hold.cd--;
       
+      // Update mobile controls after cooldown changes
+      updateMobileControls();
+      
       // Decrease bonus piece lifetimes
       decreaseBonusLifetimes();
       
@@ -1659,23 +1698,30 @@
         decreaseBombLifetimes();
       }
       
-      // Check for game over
-      if(checkGameOver()) {
-        gameOver = true;
-        render();
-        return;
-      }
-      
-      // Auto refill pool if it's empty
-      if(pool.every(p => p === null)) {
-        refillPool();
-        return;
-      }
+          // Check for game over
+    if(checkGameOver()) {
+      gameOver = true;
+      updateMobileControls();
+      render();
+      return;
+    }
+    
+    // Auto refill pool if it's empty
+    if(pool.every(p => p === null)) {
+      refillPool();
+      return;
+    }
+    
+    // Update mobile controls after turn completion
+    updateMobileControls();
     } else {
+      console.log('Returning piece to pool - no valid drop position');
+      
       // Return piece to pool if drop failed
       let emptySlot = pool.findIndex(p => p === null);
       if (emptySlot !== -1) {
         pool[emptySlot] = draggedPiece;
+        console.log('Piece returned to pool at slot:', emptySlot);
       } else {
         // If no empty slot, try to find the original slot or add to end
         console.warn("No empty slot found for returning dragged piece");
@@ -1687,6 +1733,8 @@
     isDragging = false;
     draggedPiece = null;
     dropPreview = null;
+    
+    console.log('Drag state reset, pool state:', pool);
     
     render();
   }
@@ -2190,6 +2238,9 @@ function drawBombTexts() {
               debug(`Mode: ${currentGameMode.toUpperCase()}<br/>Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces<br/>Bomb: ${bombPieces.length} pieces<br/>Total Pieces: 65`);
     
     render();
+    
+    // Update mobile controls after pool refill
+    updateMobileControls();
   }
 
   function decreaseBonusLifetimes() {
@@ -2243,6 +2294,7 @@ function drawBombTexts() {
     
     if (e.button === 2) { // Right click
       selected.index = -1; 
+      updateMobileControls();
       render(); 
       return; 
     }
@@ -2250,12 +2302,15 @@ function drawBombTexts() {
     // If clicking pool slot -> start drag
     let slot = poolSlotAt(x, y);
     if (slot >= 0 && pool[slot] !== null && !gameOver) {
+      console.log('Pool slot clicked:', { slot, piece: pool[slot], isMobile });
+      
       if (isMobile) {
         // On mobile, start drag immediately
         startDrag(pool[slot], x, y);
       } else {
         // On desktop, select first
         selected = { from: "pool", index: slot, dx: 0, dy: 0 };
+        console.log('Piece selected on desktop:', selected);
         render();
       }
       return;
@@ -2268,6 +2323,7 @@ function drawBombTexts() {
         let piece = pool[selected.index];
         if (canPlace(piece, g.r, g.c)) {
           placePieceOnBoard(piece, g.r, g.c);
+          // Note: updateMobileControls() is called inside placePieceOnBoard
         }
       }
     }
@@ -2280,6 +2336,7 @@ function drawBombTexts() {
         if (emptySlot !== -1) {
           pool[emptySlot] = hold.piece;
           hold.piece = null;
+          updateMobileControls();
           render();
           return;
         }
@@ -2398,6 +2455,9 @@ function drawBombTexts() {
     if(swapCD>0) swapCD--;
     if(hold.cd>0) hold.cd--;
     
+    // Update mobile controls after piece consumption and cooldown changes
+    updateMobileControls();
+    
     // Decrease bonus piece lifetimes
     decreaseBonusLifetimes();
     
@@ -2412,6 +2472,7 @@ function drawBombTexts() {
     // THEN check for game over (after lines have been cleared)
     if(checkGameOver()) {
       gameOver = true;
+      updateMobileControls();
       render();
       return;
     }
@@ -2426,12 +2487,21 @@ function drawBombTexts() {
   // UI buttons via keys for simplicity
   window.addEventListener('keydown', (e)=>{
     if(e.key==='h' || e.key==='H'){
+      console.log('H key pressed:', { selectedIndex: selected.index, holdPiece: hold.piece, holdCD: hold.cd, gameOver });
+      
       // Hold selected piece - chỉ khi có khối được chọn và hold slot trống
       if(selected.index>=0 && !hold.piece && hold.cd<=0 && !gameOver){
+        console.log('Hold executed for piece at index:', selected.index);
+        
         hold.piece = pool[selected.index];
         pool[selected.index] = null;
         hold.cd = holdCfg.cdTurns;
         selected.index=-1;
+        
+        console.log('Hold completed:', { holdPiece: hold.piece, holdCD: hold.cd, pool });
+        
+        // Update mobile controls after hold state change and selection reset
+        updateMobileControls();
         
         // Auto refill if pool is empty
         if(pool.every(p => p === null)) {
@@ -2439,6 +2509,13 @@ function drawBombTexts() {
         } else {
           render();
         }
+      } else {
+        console.log('Hold blocked:', { 
+          hasSelection: selected.index >= 0, 
+          holdEmpty: !hold.piece, 
+          noCooldown: hold.cd <= 0, 
+          notGameOver: !gameOver 
+        });
       }
     } else if(e.key==='1' || e.key==='2' || e.key==='3'){
       // Swap piece index 0/1/2 - chỉ khi swapCD = 0
@@ -2452,6 +2529,7 @@ function drawBombTexts() {
           // Check for game over after swap
           if(checkGameOver()) {
             gameOver = true;
+            updateMobileControls();
           }
           render();
         }
@@ -2905,23 +2983,39 @@ function drawBombTexts() {
       });
     });
     
-    // Mobile control buttons
-    if (isMobile) {
-      document.getElementById('hold-btn').addEventListener('click', function() {
-        if (selected.index >= 0 && !hold.piece && hold.cd <= 0 && !gameOver) {
-          hold.piece = pool[selected.index];
-          pool[selected.index] = null;
-          hold.cd = holdCfg.cdTurns;
-          selected.index = -1;
+          // Mobile control buttons
+      if (isMobile) {
+        document.getElementById('hold-btn').addEventListener('click', function() {
+          console.log('Mobile hold button clicked:', { selectedIndex: selected.index, holdPiece: hold.piece, holdCD: hold.cd, gameOver });
           
-          // Auto refill if pool is empty
-          if(pool.every(p === null)) {
-            refillPool();
+          if (selected.index >= 0 && !hold.piece && hold.cd <= 0 && !gameOver) {
+            console.log('Mobile hold executed for piece at index:', selected.index);
+            
+            hold.piece = pool[selected.index];
+            pool[selected.index] = null;
+            hold.cd = holdCfg.cdTurns;
+            selected.index = -1;
+            
+            console.log('Mobile hold completed:', { holdPiece: hold.piece, holdCD: hold.cd, pool });
+            
+            // Update mobile controls after hold state change and selection reset
+            updateMobileControls();
+            
+            // Auto refill if pool is empty
+            if(pool.every(p => p === null)) {
+              refillPool();
+            } else {
+              render();
+            }
           } else {
-            render();
+            console.log('Mobile hold blocked:', { 
+              hasSelection: selected.index >= 0, 
+              holdEmpty: !hold.piece, 
+              noCooldown: hold.cd <= 0, 
+              notGameOver: !gameOver 
+            });
           }
-        }
-      });
+        });
       
       document.getElementById('swap1-btn').addEventListener('click', function() {
         if (swapCD <= 0) {
@@ -2929,9 +3023,13 @@ function drawBombTexts() {
           pool[0] = makePiece(rk);
           swapCD = swapCfg.cdTurns;
           
+          // Update mobile controls after swap
+          updateMobileControls();
+          
           // Check for game over after swap
           if(checkGameOver()) {
             gameOver = true;
+            updateMobileControls();
           }
           render();
         }
@@ -2943,9 +3041,13 @@ function drawBombTexts() {
           pool[1] = makePiece(rk);
           swapCD = swapCfg.cdTurns;
           
+          // Update mobile controls after swap
+          updateMobileControls();
+          
           // Check for game over after swap
           if(checkGameOver()) {
             gameOver = true;
+            updateMobileControls();
           }
           render();
         }
@@ -2957,9 +3059,13 @@ function drawBombTexts() {
           pool[2] = makePiece(rk);
           swapCD = swapCfg.cdTurns;
           
+          // Update mobile controls after swap
+          updateMobileControls();
+          
           // Check for game over after swap
           if(checkGameOver()) {
             gameOver = true;
+            updateMobileControls();
           }
           render();
         }

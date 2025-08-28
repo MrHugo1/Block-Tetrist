@@ -552,6 +552,20 @@
     opacity: 0.6;
   }
   
+  .drag-active {
+    cursor: grabbing !important;
+  }
+  
+  .pool-slot-draggable {
+    cursor: grab;
+    transition: all 0.2s ease;
+  }
+  
+  .pool-slot-draggable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(93, 228, 199, 0.3);
+  }
+  
   /* Drag and Drop Styles */
   .piece-dragging {
     opacity: 0.7;
@@ -617,7 +631,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.17-mobile-fix</div>
+     <div class="version">v1.9.18-mode-drag-fix</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -731,6 +745,7 @@
     <div class="card legend">
       <h3>🎮 Cách Chơi</h3>
       <p><b>Chọn khối</b> từ pool bên dưới, sau đó <b>click lên ô</b> trên bàn để đặt. <span class="hl">Chuột phải</span> để bỏ chọn.</p>
+      <p><b>🖱️ Drag & Drop:</b> Kéo khối từ pool lên bàn chơi để đặt nhanh hơn!</p>
       <p><span class="hl">Hold (H)</span>: Lưu 1 khối (CD 3 lượt)</p>
       <p><span class="hl">Swap (1/2/3)</span>: Đổi khối sang khối cứu nạn (CD 9 lượt)</p>
              <p><span class="hl">Ô đỏ có số</span>: Piece có độ bền, cần xóa đủ số lần để biến mất</p>
@@ -1398,6 +1413,9 @@
   function showModeSelector() {
     document.getElementById('mode-selector').style.display = 'flex';
     gameStarted = false;
+    
+    // Show helpful message
+    msg('🎮 Chọn chế độ chơi để bắt đầu!');
   }
   
   function getModeDisplayName(mode) {
@@ -1555,10 +1573,16 @@
   function startDrag(piece, startX, startY) {
     if (!piece) return;
     
+    // Clear any existing selection
+    selected.index = -1;
+    
     isDragging = true;
     draggedPiece = piece;
     dragStartPos = { x: startX, y: startY };
     dragOffset = { x: startX, y: startY };
+    
+    // Update cursor and visual feedback
+    canvas.classList.add('drag-active');
     
     // Don't remove piece from pool immediately - keep it there until drop
     // This prevents the piece from disappearing during drag
@@ -1593,6 +1617,13 @@
       let emptySlot = pool.findIndex(p => p === null);
       if (emptySlot !== -1) {
         pool[emptySlot] = draggedPiece;
+      } else {
+        // If no empty slot, find the original slot
+        let originalSlot = pool.findIndex(p => p === draggedPiece);
+        if (originalSlot === -1) {
+          // If piece not found in pool, add it back to first available slot
+          pool[0] = draggedPiece;
+        }
       }
     }
     
@@ -1600,6 +1631,9 @@
     isDragging = false;
     draggedPiece = null;
     dropPreview = null;
+    
+    // Remove cursor class
+    canvas.classList.remove('drag-active');
     
     render();
   }
@@ -2163,14 +2197,8 @@ function drawBombTexts() {
     // If clicking pool slot -> start drag
     let slot = poolSlotAt(x, y);
     if (slot >= 0 && pool[slot] !== null) {
-      if (isMobile) {
-        // On mobile, start drag immediately
-        startDrag(pool[slot], x, y);
-      } else {
-        // On desktop, select first
-        selected = { from: "pool", index: slot, dx: 0, dy: 0 };
-        render();
-      }
+      // Always start drag for both mobile and desktop
+      startDrag(pool[slot], x, y);
       return;
     }
 
@@ -2879,14 +2907,17 @@ function drawBombTexts() {
       });
     }
     
-    // Initialize high score display
-    updateHighScoreDisplay();
-  });
+      // Initialize high score display
+  updateHighScoreDisplay();
   
-  // Boot
-  if (currentGameMode === 'blocker') {
-    generateDurablePieces();
-  }
+  // Show mode selector at startup
+  showModeSelector();
+});
+
+// Boot
+if (currentGameMode === 'blocker') {
+  generateDurablePieces();
+}
   
   // Ensure pool starts with 3 pieces
   pool = [null, null, null];

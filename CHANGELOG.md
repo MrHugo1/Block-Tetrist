@@ -1,6 +1,35 @@
 # Block Tetrist - Changelog
 
-## v1.9.17-mobile-fix (Latest)
+## v1.9.18-mode-drag-fix (Latest)
+**Game Mode Selection & Drag & Drop Fixes**
+
+### 🎮 Game Mode System Fixes
+- **Fixed mode selector display**: Mode selector now shows correctly when game starts
+- **Added startup mode selection**: Players can now choose game mode before starting
+- **Improved mode switching**: Better handling of mode changes and game resets
+- **Enhanced user guidance**: Added helpful messages when mode selector is displayed
+
+### 🖱️ Drag & Drop Improvements
+- **Fixed drag & drop conflicts**: Resolved issues between drag & drop and click-to-place systems
+- **Enhanced visual feedback**: Added cursor changes and hover effects during drag operations
+- **Improved error handling**: Better handling of failed drops and edge cases
+- **Unified interaction**: Consistent drag & drop behavior across desktop and mobile
+
+### 🐛 Bug Fixes
+- **Fixed piece selection conflicts**: Clear selection when starting drag operations
+- **Fixed drop validation**: Improved piece placement validation and error recovery
+- **Fixed mobile touch handling**: Better touch event integration with drag & drop
+- **Fixed visual glitches**: Resolved cursor and visual feedback issues
+
+### ✨ User Experience Enhancements
+- **Better instructions**: Added drag & drop guidance in game legend
+- **Visual cues**: Enhanced hover effects and cursor feedback
+- **Responsive design**: Improved mobile drag & drop experience
+- **Error prevention**: Better handling of invalid drop operations
+
+---
+
+## v1.9.17-mobile-fix
 **Mobile Layout & Functionality Fixes**
 
 ### 🎯 Layout & Size Improvements

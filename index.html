@@ -357,10 +357,16 @@
        max-width: 85vw;
      }
      .game-over-title { font-size: 14px; }
-     .game-over-button { 
-       font-size: 11px; 
-       padding: 5px 10px;
-     }
+         .game-over-button { 
+      font-size: 11px; 
+      padding: 5px 10px;
+    }
+    /* Mobile-specific canvas sizing */
+    canvas {
+      max-height: 90vh; /* Even larger on mobile */
+      width: 95vw; /* Use most of viewport width */
+      height: auto; /* Let height adjust automatically */
+    }
   }
   
   /* Game Mode Selector Styles */
@@ -546,6 +552,24 @@
     opacity: 0.6;
   }
   
+  /* Drag and Drop Styles */
+  .piece-dragging {
+    opacity: 0.7;
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+  }
+  
+  .board-drop-zone {
+    position: relative;
+  }
+  
+  .drop-preview {
+    position: absolute;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0.6;
+  }
+  
   @media (max-width: 768px) {
     .mode-grid {
       grid-template-columns: 1fr;
@@ -593,7 +617,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.16-mobile</div>
+     <div class="version">v1.9.17-mobile-fix</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -762,10 +786,10 @@
 
   // Layout
   const BOARD_SIZE = 8;
-  const CELL = 60; // cell px
+  const CELL = isMobile ? 80 : 60; // Larger cells on mobile
   const BOARD_X = (W - CELL*BOARD_SIZE)/2; // center
-  const BOARD_Y = 40;
-  const POOL_Y = 620;
+  const BOARD_Y = isMobile ? 60 : 40; // More space from top on mobile
+  const POOL_Y = isMobile ? 580 : 620; // Adjust pool position for mobile
   
   // Mobile detection
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -1536,11 +1560,8 @@
     dragStartPos = { x: startX, y: startY };
     dragOffset = { x: startX, y: startY };
     
-    // Remove piece from pool
-    if (selected.index >= 0) {
-      pool[selected.index] = null;
-      selected.index = -1;
-    }
+    // Don't remove piece from pool immediately - keep it there until drop
+    // This prevents the piece from disappearing during drag
     
     render();
   }
@@ -1565,96 +1586,8 @@
     if (!isDragging || !draggedPiece) return;
     
     if (dropPreview) {
-      // Place piece on board
-      let placedCells = placePiece(draggedPiece, dropPreview.r, dropPreview.c);
-      let cleared = clearLines();
-      
-      // scoring
-      const lines = cleared.rows.length + cleared.cols.length;
-      let baseScore = placedCells*scoring.cell + lines*scoring.line;
-      
-      // Apply bonus multiplier if any bonus pieces were cleared
-      if(cleared.bonusMultiplier > 1) {
-        let bonusScore = baseScore * (cleared.bonusMultiplier - 1);
-        score += baseScore + bonusScore;
-        
-        // Display bonus score text
-        let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
-        let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
-        addBonusText(`+${bonusScore}`, centerX, centerY + 120);
-      } else {
-        score += baseScore;
-      }
-      
-      // Precision bonus only for Blocker Mode
-      if (currentGameMode === 'blocker') {
-        if(lines>=3) score = Math.floor(score*scoring.precisionThree);
-        else if(lines>=2) score = Math.floor(score*scoring.precisionTwo);
-      }
-      
-      // combo
-      if(lines>0) comboLevel = Math.min(comboLevel+1, scoring.comboSteps.length-1);
-      else comboLevel = 0;
-      score = Math.floor(score * Math.min(scoring.comboSteps[comboLevel], scoring.comboCap));
-      
-      // Add combo text based on consecutive streak
-      if(lines > 0) {
-        comboStreak++;
-        let centerX = BOARD_X + (BOARD_SIZE * CELL) / 2;
-        let centerY = BOARD_Y + (BOARD_SIZE * CELL) / 2;
-        
-        let comboText = "Good";
-        if(comboStreak >= 10) comboText = "Ultimate!";
-        else if(comboStreak >= 9) comboText = "Godlike!";
-        else if(comboStreak >= 8) comboText = "Legendary!";
-        else if(comboStreak >= 7) comboText = "Unbelievable!";
-        else if(comboStreak >= 6) comboText = "Incredible!";
-        else if(comboStreak >= 5) comboText = "Fantastic!";
-        else if(comboStreak >= 4) comboText = "Amazing!";
-        else if(comboStreak >= 3) comboText = "Great!";
-        else if(comboStreak >= 2) comboText = "Nice!";
-        
-        if(cleared.crossBonus > 0) {
-          let bonusText = "";
-          if(cleared.crossBonus >= 999) bonusText = "CLEAR ALL!";
-          else if(cleared.crossBonus >= 6) bonusText = "MEGA CROSS!";
-          else if(cleared.crossBonus >= 4) bonusText = "BIG CROSS!";
-          else if(cleared.crossBonus >= 3) bonusText = "CROSS!";
-          
-          if(bonusText) {
-            addComboText(bonusText, centerX, centerY + 60);
-          }
-        }
-        
-        addComboText(comboText, centerX, centerY);
-      } else {
-        comboStreak = 0;
-      }
-      
-      turn++;
-      if(swapCD>0) swapCD--;
-      if(hold.cd>0) hold.cd--;
-      
-      // Decrease bonus piece lifetimes
-      decreaseBonusLifetimes();
-      
-      // Decrease bomb lifetimes - Only for Blast Mode
-      if (currentGameMode === 'blast') {
-        decreaseBombLifetimes();
-      }
-      
-      // Check for game over
-      if(checkGameOver()) {
-        gameOver = true;
-        render();
-        return;
-      }
-      
-      // Auto refill pool if it's empty
-      if(pool.every(p => p === null)) {
-        refillPool();
-        return;
-      }
+      // Place piece on board using helper function
+      placePieceOnBoard(draggedPiece, dropPreview.r, dropPreview.c);
     } else {
       // Return piece to pool if drop failed
       let emptySlot = pool.findIndex(p => p === null);

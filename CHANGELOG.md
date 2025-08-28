@@ -1,68 +1,124 @@
-# Block Tetrist Changelog
+# Block Tetrist - Changelog
 
-## [v1.9.16-mobile] - 2024-12-19
-### 🚀 Mobile Optimization
-- **Complete mobile layout redesign** for 9:16 portrait screens
-- **Touch controls** replacing keyboard controls on mobile devices
-- **Drag & Drop system** for piece placement with visual preview
-- **Mobile control buttons** for Hold and Swap operations
-- **Responsive design** with all content fitting in single mobile screen
-- **Touch event handling** with proper mobile gesture support
-- **Optimized font sizes and spacing** for mobile readability
-- **Prevented scrolling** to maintain single-screen experience
+## v1.9.17-mobile-fix (Latest)
+**Mobile Layout & Functionality Fixes**
 
-### 🎮 New Controls
-- **Touch & Drag**: Select piece → drag to board → release to place
-- **Hold Button**: Touch-friendly hold operation with cooldown display
-- **Swap Buttons**: Touch-friendly swap operations for slots 1, 2, 3
-- **Visual feedback**: Drop preview and drag indicators
+### 🎯 Layout & Size Improvements
+- **Increased canvas size on mobile**: Changed from `max-height: 60vh` to `max-height: 80vh` for better mobile experience
+- **Mobile-specific canvas sizing**: Added `max-height: 90vh` and `width: 95vw` in mobile media queries
+- **Larger game board cells**: Increased `CELL` size from 60px to 80px on mobile devices
+- **Better positioning**: Adjusted `BOARD_Y` from 40 to 60 and `POOL_Y` from 620 to 580 on mobile for optimal spacing
 
-### 📱 Mobile Features
-- **Auto-detection** of mobile devices
-- **Adaptive UI** that switches between desktop and mobile controls
-- **Touch-optimized** button sizes and spacing
-- **Gesture support** for natural mobile interaction
+### 🐛 Bug Fixes
+- **Fixed drag & drop functionality**: Corrected `startDrag()` function to not remove pieces from pool immediately
+- **Fixed piece placement**: Streamlined `endDrag()` function to use `placePieceOnBoard()` helper
+- **Fixed touch event handling**: Resolved conflicts between canvas event listeners and touch events
+- **Fixed syntax errors**: Corrected indentation and structure issues in drag & drop functions
 
-## [v1.9.15] - 2024-12-19
-### 🎯 Game Modes
-- **4 Game Modes**: Basic, Blocker, Multiplier, Blast
-- **Mode-specific mechanics** and scoring systems
-- **High Score tracking** for each mode separately
+### 📱 Mobile Experience
+- **Larger touch targets**: Game board now occupies at least 50% of mobile screen height
+- **Better visual feedback**: Improved drag preview and piece rendering during touch operations
+- **Responsive layout**: Canvas automatically adjusts to mobile viewport dimensions
 
-### 🧩 Piece System
-- **65 unique pieces** with 4 rotation directions
-- **Smart piece generation** with bias system
-- **Rescue pieces** for deadlock situations
+### 🔧 Technical Improvements
+- **Cleaner code structure**: Simplified drag & drop logic for better maintainability
+- **Mobile detection**: Enhanced mobile-specific constants and positioning
+- **Event handling**: Improved touch event integration with existing game logic
 
-### 🎨 Visual Enhancements
-- **Modern gradient design** with smooth animations
-- **Combo text animations** with streak-based messages
-- **Bonus piece system** with multiplier effects
-- **Durable pieces** with health system (Blocker Mode)
-- **Bomb pieces** with explosion mechanics (Blast Mode)
+---
 
-### 🏆 Scoring System
-- **Multi-layered scoring**: Cell, Line, Precision, Combo
-- **Chain multiplier** system with visual feedback
-- **Cross-clear bonuses** for simultaneous row/column clears
-- **Bonus piece multipliers** (x2 to x7) with lifetime system
+## v1.9.16-mobile
+**Major Mobile Optimization Release**
 
-### ⚙️ Game Mechanics
-- **Hold system** with 3-turn cooldown
-- **Swap system** with 9-turn cooldown and rescue pieces
-- **Fill Rate management** with smart bias adjustments
-- **Deadlock prevention** with guardrail system
+### 🎮 Complete Mobile Adaptation
+- **Responsive Layout**: Redesigned for 9:16 vertical mobile screens
+- **Touch Controls**: Replaced keyboard shortcuts with on-screen buttons
+- **Drag & Drop**: New piece placement system (hold piece, drag to board, release to place)
+- **Single Screen Experience**: All layout information fits without scrolling
 
-### 🔧 Technical Features
-- **Responsive design** for different screen sizes
-- **Local storage** for high score persistence
-- **Debug information** display
-- **Performance optimizations** for smooth gameplay
+### 📱 Mobile-Specific Features
+- **Mobile Control Buttons**: Dedicated Hold, Swap 1, Swap 2, Swap 3 buttons
+- **Touch Event Handling**: Full support for `touchstart`, `touchmove`, `touchend`
+- **Responsive Design**: CSS media queries for mobile optimization
+- **Touch-Friendly UI**: Larger buttons, better spacing, mobile-optimized fonts
 
-## [v1.9.0] - 2024-12-19
-### 🎮 Initial Release
-- **8×8 game board** with smart piece placement
-- **Basic scoring system** with line clearing mechanics
-- **Piece rotation system** with multiple orientations
-- **Core game loop** with pool management
-- **Basic UI** with score and turn display
+### 🎯 Input System Overhaul
+- **Desktop vs Mobile**: Different interaction modes (click-to-place vs drag-and-drop)
+- **Event Listeners**: Refactored to support both mouse and touch input
+- **Piece Management**: Enhanced drag preview and visual feedback
+- **Control Instructions**: Context-sensitive help text for different devices
+
+### 🔧 Code Improvements
+- **Helper Functions**: New `placePieceOnBoard()` function for common logic
+- **Mobile Detection**: `navigator.userAgent` based mobile detection
+- **State Management**: Added drag & drop variables and state tracking
+- **Performance**: Optimized rendering with drag previews
+
+---
+
+## v1.9.15
+**Game Mode System & Advanced Features**
+
+### 🎮 New Game Modes
+- **Basic Mode**: Standard chain multiplier gameplay
+- **Blocker Mode**: Durable pieces with precision bonuses
+- **Multiplier Mode**: Bonus point system with multipliers
+- **Blast Mode**: Bomb explosion mechanics
+
+### ⭐ Advanced Gameplay Features
+- **Durable Pieces**: Red pieces requiring multiple hits to clear
+- **Bonus Pieces**: Multiplier pieces (x2-x7) with lifetime system
+- **Bomb Pieces**: Explosive pieces that clear 3x3 areas
+- **Precision Bonuses**: Extra points for clearing multiple lines
+
+### 🏆 Enhanced Scoring System
+- **Mode-Specific High Scores**: Separate tracking for each game mode
+- **Combo System**: Progressive multiplier increases
+- **Bonus Multipliers**: Stacking bonus point calculations
+- **Cross Bonuses**: Special rewards for clearing rows and columns simultaneously
+
+### 🔧 Technical Improvements
+- **Local Storage**: Persistent high scores across sessions
+- **Game State Management**: Enhanced state tracking and persistence
+- **Piece Generation**: Improved piece spawning algorithms
+- **Performance Optimization**: Better rendering and update cycles
+
+---
+
+## v1.9.14
+**Core Gameplay & UI Enhancements**
+
+### 🎯 Game Mechanics
+- **8x8 Game Board**: Optimized board size for strategic gameplay
+- **Piece Pool System**: 3-piece pool with smart refilling
+- **Line Clearing**: Row and column clearing mechanics
+- **Scoring System**: Base scoring with combo multipliers
+
+### 🎨 User Interface
+- **Modern Design**: Gradient backgrounds and smooth animations
+- **Responsive Layout**: Flexible design for different screen sizes
+- **Visual Feedback**: Hover effects and transition animations
+- **Game Statistics**: Real-time score, turn, and combo display
+
+### 🔧 Core Systems
+- **Piece Management**: 65 unique piece types with rotations
+- **Grid System**: Efficient board state management
+- **Event Handling**: Mouse and keyboard input support
+- **Rendering Engine**: HTML5 Canvas-based graphics
+
+---
+
+## v1.9.13
+**Initial Release & Foundation**
+
+### 🚀 Project Setup
+- **HTML5 Canvas**: Core rendering technology
+- **JavaScript Game Logic**: Complete game state management
+- **CSS Styling**: Modern, responsive design system
+- **Basic Gameplay**: Core tetris-like mechanics
+
+### 📁 Project Structure
+- **Single File Architecture**: All code in `index.html`
+- **Modular Functions**: Organized, maintainable code structure
+- **Documentation**: Comprehensive README and changelog
+- **Version Control**: Incremental version tracking system

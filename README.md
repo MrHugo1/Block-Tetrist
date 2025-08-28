@@ -28,26 +28,25 @@ Block Tetrist là một game puzzle chiến thuật với bàn chơi 8×8, nơi 
 - **Responsive design** cho mọi kích thước màn hình
 - **Mobile-optimized** với touch controls
 
-## 📱 Mobile Optimization (v1.9.16+)
+## 📱 Mobile Optimization (v1.9.17+)
 
-### 🚀 Tính Năng Mobile
-- **Complete mobile layout redesign** cho màn hình dọc 9:16
-- **Touch controls** thay thế keyboard controls trên mobile
-- **Drag & Drop system** với visual preview
-- **Mobile control buttons** cho Hold và Swap operations
-- **Responsive design** với tất cả nội dung vừa trong 1 màn hình mobile
+### 🎯 Latest Mobile Improvements
+- **Larger Game Board**: Canvas now occupies at least 50% of mobile screen height
+- **Enhanced Touch Controls**: Improved drag & drop functionality for piece placement
+- **Better Visual Feedback**: Enhanced drag previews and piece rendering
+- **Responsive Layout**: Automatic canvas sizing for optimal mobile experience
 
-### 🎮 Điều Khiển Mobile
-- **Touch & Drag**: Chọn khối → kéo lên bàn chơi → thả để đặt
-- **Hold Button**: Nút Hold thân thiện với touch và hiển thị cooldown
-- **Swap Buttons**: Nút Swap thân thiện với touch cho slot 1, 2, 3
-- **Visual feedback**: Drop preview và drag indicators
+### 📱 Mobile Controls
+- **Touch & Drag**: Select a piece from the pool, drag it to the board with preview, release to place
+- **Hold Button**: Touch-friendly hold operation with cooldown display
+- **Swap Buttons**: Touch-friendly swap operations for slots 1, 2, and 3
+- **Visual Feedback**: Drop preview shows where the piece will be placed
 
-### 📱 Mobile Features
-- **Auto-detection** của mobile devices
-- **Adaptive UI** chuyển đổi giữa desktop và mobile controls
-- **Touch-optimized** button sizes và spacing
-- **Gesture support** cho natural mobile interaction
+### 🎮 Mobile Experience
+- **Single Screen**: All game information fits within one mobile screen (no scrolling)
+- **Touch Optimized**: Larger buttons and touch targets for mobile devices
+- **Responsive Design**: Automatically adapts to different mobile screen sizes
+- **Gesture Support**: Natural touch interactions for piece placement
 
 ## 🎮 Cách Chơi
 

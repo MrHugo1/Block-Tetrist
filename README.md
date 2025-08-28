@@ -1,66 +1,67 @@
-# 🎮 Block Tetrist - Game Đặt Khối Thông Minh
+# Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.8.4  
-**Ngày cập nhật:** 19/12/2024
+## 🎮 Giới Thiệu
+Block Tetrist là một game puzzle chiến thuật với bàn chơi 8×8, nơi người chơi đặt các khối có hình dạng khác nhau để tạo thành hàng và cột hoàn chỉnh. Game được thiết kế với giao diện hiện đại và nhiều tính năng nâng cao.
 
-Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
+## ✨ Tính Năng Chính
 
-## ✨ Tính Năng Mới Nhất (v1.8.0)
-
-### 🎮 Hệ Thống Game Modes
-- **4 Chế Độ Chơi**: Basic, Blocker, Multiplier, Blast
+### 🎯 4 Game Modes
 - **Basic Mode**: Chain multiplier cơ bản
 - **Blocker Mode**: Durable pieces + Precision bonus
 - **Multiplier Mode**: Bonus points system
 - **Blast Mode**: Bomb explosion system
-- **High Score Riêng Biệt**: Mỗi mode có điểm cao nhất riêng
-
-### 💣 Hệ Thống Bomb (Blast Mode)
-- **Ô Bomb Chiến Thuật**: Xuất hiện khi Fill Rate > 60% (1 lần/1 ván)
-- **Nổ 3x3 Thông Minh**: Bomb nổ vùng 3x3 với bomb ở trung tâm
-- **Kích Hoạt Bonus**: Bomb có thể kích hoạt ô bonus trong vùng nổ
-- **Tính Điểm Nổ**: Mỗi ô bị nổ cho điểm tương ứng
-- **Lifetime Management**: Bomb tự biến mất sau 1-2 lượt nếu không nổ
-
-### 🎁 Hệ Thống Bonus Points
-- **Ô Bonus x2-x7**: Xuất hiện sau khi clear line (30% chance)
-- **Nhân Điểm Thông Minh**: Clear line chứa ô bonus → nhân điểm tương ứng
-- **Nhân Dồn**: Nhiều ô bonus cùng lúc → nhân dồn (x2 × x5 = x10)
-- **Tự Động Biến Mất**: Ô bonus tồn tại 2-4 lượt tùy theo hệ số nhân
-
-### 🔧 Sửa Lỗi Quan Trọng
-- **Sửa Logic Spawn**: Bonus pieces giờ spawn trên pieces có sẵn, không phải ô trống
-- **Sửa Thứ Tự Xử Lý**: Spawn bonus mới trước khi xóa bonus cũ
-- **Sửa Logic Clear Line**: Bonus pieces được tính đúng trong việc clear line
-- **Thêm Debug Logging**: Console.log chi tiết để track hoạt động của bonus system
-
-## 🎯 Tính Năng Chính
 
 ### 🧩 Hệ Thống Khối
-- **71 Loại Khối**: Bao gồm tất cả hướng xoay (0°, 90°, 180°, 270°)
-- **Pool 3 Khối**: Chọn khối từ 3 khối có sẵn
-- **Hold System**: Lưu 1 khối (CD 3 lượt)
-- **Swap System**: Đổi khối cứu nạn (CD 9 lượt)
+- **65 loại khối** với 4 hướng xoay khác nhau
+- **Smart piece generation** với bias system
+- **Rescue pieces** cho tình huống kẹt
 
 ### 🏆 Hệ Thống Điểm
-- **Chain Multiplier**: Clear liên tiếp tăng multiplier (≤1.5×)
-- **Precision Bonus**: Clear ≥2 line nhân điểm (1.2× / 1.5×)
-- **Combo System**: Tích lũy theo thời gian
-- **Bonus Multiplier**: Ô x2-x7 nhân điểm khi clear line
+- **Multi-layered scoring**: Cell, Line, Precision, Combo
+- **Chain multiplier** với visual feedback
+- **Cross-clear bonuses** cho việc clear đồng thời hàng/cột
+- **Bonus piece multipliers** (x2 đến x7) với hệ thống lifetime
 
 ### 🎨 Giao Diện
-- **Thiết Kế Hiện Đại**: Gradient, animation mượt mà
-- **Responsive**: Tối ưu cho mọi kích thước màn hình
-- **Visual Feedback**: Text animation, combo display
-- **Debug Panel**: Thông tin chi tiết về game state
+- **Modern gradient design** với smooth animations
+- **Combo text animations** với streak-based messages
+- **Responsive design** cho mọi kích thước màn hình
+- **Mobile-optimized** với touch controls
+
+## 📱 Mobile Optimization (v1.9.16+)
+
+### 🚀 Tính Năng Mobile
+- **Complete mobile layout redesign** cho màn hình dọc 9:16
+- **Touch controls** thay thế keyboard controls trên mobile
+- **Drag & Drop system** với visual preview
+- **Mobile control buttons** cho Hold và Swap operations
+- **Responsive design** với tất cả nội dung vừa trong 1 màn hình mobile
+
+### 🎮 Điều Khiển Mobile
+- **Touch & Drag**: Chọn khối → kéo lên bàn chơi → thả để đặt
+- **Hold Button**: Nút Hold thân thiện với touch và hiển thị cooldown
+- **Swap Buttons**: Nút Swap thân thiện với touch cho slot 1, 2, 3
+- **Visual feedback**: Drop preview và drag indicators
+
+### 📱 Mobile Features
+- **Auto-detection** của mobile devices
+- **Adaptive UI** chuyển đổi giữa desktop và mobile controls
+- **Touch-optimized** button sizes và spacing
+- **Gesture support** cho natural mobile interaction
 
 ## 🎮 Cách Chơi
 
-### 📱 Điều Khiển
-- **Chuột trái**: Chọn khối từ pool, click đặt lên bàn
-- **Chuột phải**: Bỏ chọn khối
-- **Phím H**: Hold khối đang chọn
-- **Phím 1/2/3**: Swap khối slot tương ứng
+### 🖱️ Desktop Controls
+- **Click** vào khối trong pool để chọn
+- **Click** lên ô trên bàn để đặt khối
+- **H** - Hold khối đang chọn
+- **1/2/3** - Swap khối slot 1/2/3
+- **Chuột phải** - Bỏ chọn
+
+### 📱 Mobile Controls
+- **Touch & Drag**: Chạm vào khối → kéo lên bàn chơi → thả để đặt
+- **Hold Button**: Nút Hold với cooldown display
+- **Swap Buttons**: Nút Swap cho từng slot với cooldown display
 
 ### 🎯 Mục Tiêu
 - Đặt khối để tạo thành hàng/cột hoàn chỉnh
@@ -68,122 +69,124 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - Duy trì combo để tăng điểm
 - Quản lý Fill Rate thông minh
 - Clear các ô có độ bền (màu đỏ) để tăng điểm
-- Tận dụng ô bonus để nhân điểm
-- **Chiến thuật sử dụng bomb**: Kích hoạt bomb đúng thời điểm để tối đa hóa điểm
 
-## 🔧 Cài Đặt & Chạy
+## 🏆 Hệ Thống Điểm
 
-### 📋 Yêu Cầu
-- Trình duyệt web hiện đại (Chrome, Firefox, Safari, Edge)
-- Hỗ trợ HTML5 Canvas
+### 📊 Scoring Components
+- **Cell Points**: Điểm cơ bản cho mỗi ô đặt
+- **Line Bonus**: Bonus cho việc clear hàng/cột
+- **Precision Bonus**: Bonus cho việc clear nhiều line cùng lúc
+- **Combo Multiplier**: Nhân điểm theo streak liên tiếp
+- **Bonus Multipliers**: Nhân điểm từ bonus pieces (x2-x7)
+
+### 🔄 Chain System
+- Clear liên tiếp tăng multiplier (≤1.5×)
+- Combo tích lũy theo thời gian
+- Reset combo khi không clear line
+
+## 🎨 Game Modes
+
+### 🎯 Basic Mode
+- Chain multiplier cơ bản
+- Không có special mechanics
+- Tập trung vào gameplay cốt lõi
+
+### 🛡️ Blocker Mode
+- Durable pieces với độ bền
+- Precision bonus cho việc clear nhiều line
+- Strategic depth với health management
+
+### ⭐ Multiplier Mode
+- Bonus pieces spawn sau line clear
+- Multiplier stacking system
+- High-risk, high-reward gameplay
+
+### 💣 Blast Mode
+- Bomb pieces với explosion mechanics
+- 3x3 explosion areas
+- Strategic bomb placement và timing
+
+## 🔧 Technical Features
+
+### 💾 Data Persistence
+- **Local Storage** cho high scores
+- **Mode-specific** high score tracking
+- **Persistent settings** giữa sessions
+
+### 🎮 Performance
+- **Canvas rendering** với hardware acceleration
+- **Optimized algorithms** cho smooth gameplay
+- **Responsive design** cho mọi device
+
+### 🌐 Cross-Platform
+- **HTML5/JavaScript** - chạy trên mọi browser
+- **Touch support** cho mobile devices
+- **Keyboard support** cho desktop
+
+## 📱 Mobile Experience
+
+### 📐 Layout Optimization
+- **9:16 Portrait** layout optimization
+- **Single screen** experience (không scroll)
+- **Touch-friendly** button sizes
+- **Optimized spacing** cho mobile readability
+
+### 🎯 Touch Controls
+- **Natural gestures** cho piece placement
+- **Visual feedback** cho mọi action
+- **Intuitive UI** cho mobile users
+- **Responsive touch** handling
+
+## 🚀 Cài Đặt & Chạy
+
+### 📥 Download
+1. Clone repository hoặc download source code
+2. Mở `index.html` trong browser
+3. Chọn game mode và bắt đầu chơi
+
+### 🌐 Online Play
+- Game có thể chạy trực tiếp từ file HTML
+- Không cần server hoặc internet connection
+- Tương thích với mọi modern browser
+
+### 📱 Mobile Setup
+- Mở game trên mobile browser
+- Game tự động detect mobile device
+- UI tự động chuyển sang mobile mode
+
+## 📊 System Requirements
+
+### 💻 Desktop
+- Modern browser với HTML5 support
 - JavaScript enabled
+- Minimum 1024x768 resolution
 
-### 🚀 Chạy Game
-1. Tải file `index.html`
-2. Mở bằng trình duyệt web
-3. Bắt đầu chơi ngay lập tức!
+### 📱 Mobile
+- iOS 12+ hoặc Android 8+
+- Modern mobile browser
+- Touch screen support
+- Portrait orientation recommended
 
-### 🧪 Test Bonus System
-- Mở file `test.html` để kiểm tra hệ thống bonus
-- Chạy comprehensive test suite
-- Xem console.log để debug
+## 🔄 Version History
 
-## 📊 Thống Kê Game
+### v1.9.16-mobile (Latest)
+- Complete mobile optimization
+- Touch controls và drag & drop
+- 9:16 portrait layout
+- Mobile-optimized UI
 
-### 📈 Scoring System
-- **Đặt khối**: 1 điểm/ô
-- **Clear line**: 10 điểm/line
-- **Precision bonus**: 1.2× (2 lines), 1.5× (3+ lines)
-- **Chain multiplier**: Tối đa 1.5×
-- **Bonus multiplier**: x2 đến x7 (nhân dồn)
-- **Bomb explosion**: 1 điểm/ô bị nổ + bonus points từ bonus pieces
+### v1.9.15
+- 4 game modes
+- 65 unique pieces
+- Advanced scoring system
+- Modern UI design
 
-### 🎲 Game Mechanics
-- **Bàn chơi**: 8×8 ô
-- **Khối tối đa**: 71 loại với 4 hướng xoay
-- **Pool size**: 3 khối
-- **Bonus pieces**: Tối đa 4 ô trên bàn
-- **Durable pieces**: 6-12 ô với độ bền 2-5
-- **Bomb pieces**: Tối đa 1 ô trên bàn (khi FR > 60%)
+## 🤝 Contributing
+Game được phát triển với mục tiêu tạo ra trải nghiệm puzzle game tốt nhất cho cả desktop và mobile. Mọi feedback và suggestions đều được welcome!
 
-## 🐛 Báo Cáo Lỗi & Đóng Góp
-
-### 📝 Báo Cáo Lỗi
-Nếu gặp vấn đề, vui lòng:
-1. Kiểm tra console log để xem debug info
-2. Ghi lại các bước để tái hiện lỗi
-3. Mô tả chi tiết vấn đề gặp phải
-
-### 🔧 Đóng Góp Code
-Để đóng góp:
-1. Fork repository
-2. Tạo feature branch
-3. Commit changes với message rõ ràng
-4. Tạo Pull Request
-
-## 📜 Lịch Sử Phiên Bản
-
-### v1.8.4 (19/12/2024)
-- 🐛 Sửa lỗi duplicate piece names gây overwrite
-- 🔧 Cập nhật piece count chính xác từ 44 → 71 pieces
-- 🎯 Sửa Cross shape rotations để có 4 hướng khác nhau
-- 📝 Cập nhật documentation và debug info
-
-### v1.8.3 (19/12/2024)
-- ✨ Thêm 12 pieces mới với 4 hướng xoay mỗi loại
-- 🧩 Tổng cộng 71 pieces (tăng từ 32)
-- 🎨 Màu sắc riêng biệt cho từng loại piece mới
-- 🔧 Cải thiện hệ thống sinh piece và rotation
-
-### v1.8.0 (19/12/2024)
-- ✨ Thêm hệ thống game modes hoàn chỉnh với 4 chế độ chơi
-- 🎮 Basic Mode: Chain multiplier cơ bản
-- 🛡️ Blocker Mode: Durable pieces + Precision bonus
-- ⭐ Multiplier Mode: Bonus points system
-- 💣 Blast Mode: Bomb explosion system
-- 🏆 High score riêng biệt cho từng mode
-- 🎨 Giao diện chọn mode đẹp mắt với popup
-
-### v1.7.0 (19/12/2024)
-- ✨ Thêm hệ thống bomb hoàn chỉnh với nổ 3x3
-- 🎯 Bomb spawn khi Fill Rate > 60% (1 lần/1 ván)
-- 💥 Bomb có thể kích hoạt bonus pieces trong vùng nổ
-- 🔧 Tích hợp bomb system với bonus và durable pieces
-- 📝 Cập nhật version và documentation
-
-### v1.6.2 (19/12/2024)
-- 🐛 Sửa toàn bộ hệ thống bonus points
-- 🔧 Cải thiện logic spawn và xử lý bonus
-- 📝 Thêm comprehensive debug logging
-- 🧪 Tạo test suite cho bonus system
-
-### v1.6.1 (19/12/2024)
-- 🐛 Sửa logic spawn bonus pieces
-- 🔧 Thêm debug logging
-- 📊 Tạm thời set spawn chance = 100%
-
-### v1.6.0 (19/12/2024)
-- ✨ Thêm hệ thống bonus points hoàn chỉnh
-- 🎨 Color coding cho bonus pieces
-- 🎯 Lifetime management system
-- 📊 Multiplier stacking mechanics
-
-### v1.5.0 (19/12/2024)
-- ✨ Hệ thống durable pieces
-- 🎯 Cross clear bonus mechanics
-- 🏆 Enhanced combo system
-- 🎮 Improved game over logic
-
-Xem [CHANGELOG.md](CHANGELOG.md) để biết chi tiết đầy đủ.
-
-## 📄 Giấy Phép
-
-Dự án này được phát hành dưới giấy phép MIT. Xem file LICENSE để biết thêm chi tiết.
-
-## 🙏 Lời Cảm Ơn
-
-Cảm ơn tất cả những ai đã đóng góp ý tưởng và phản hồi để cải thiện game!
+## 📄 License
+Game được phát triển cho mục đích giáo dục và giải trí. Feel free to use và modify theo nhu cầu của bạn.
 
 ---
 
-**🎮 Chúc bạn chơi game vui vẻ và đạt điểm cao! 🏆**
+**🎮 Chơi ngay và thử thách bản thân với Block Tetrist!**

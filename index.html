@@ -593,7 +593,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.16-mobile</div>
+           <div class="version">v1.9.18-mobile</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -1192,7 +1192,7 @@
       "ox"
     ), 
 
-    "L5t_270": decodePiece(
+    "L5T_270": decodePiece(
       "ooxo",
       "xxxx"
   ),
@@ -1317,7 +1317,7 @@
      // L5 pieces
      "L5": 0.06, "L5_90": 0.06, "L5_180": 0.06, "L5_270": 0.06,
      "L5R": 0.06, "L5_90": 0.06, "L5_180": 0.06, "L5_270": 0.06,
-     "L5T": 0.06, "L5T_90": 0.06, "L5T_180": 0.06, "L5t_270": 0.06,
+     "L5T": 0.06, "L5T_90": 0.06, "L5T_180": 0.06, "L5T_270": 0.06,
      
      // X pieces
      "X2": 0.06, "X2_90": 0.06,
@@ -1405,10 +1405,10 @@
   function updateMobileControls() {
     if (!isMobile) return;
     
-    // Update Hold button
-    const holdBtn = document.getElementById('hold-btn');
-    holdBtn.disabled = !hold.piece && (hold.cd > 0 || selected.index < 0);
-    holdBtn.textContent = hold.cd > 0 ? `Hold (${hold.cd})` : 'Hold';
+      // Update Hold button
+  const holdBtn = document.getElementById('hold-btn');
+  holdBtn.disabled = hold.cd > 0 || selected.index < 0 || hold.piece !== null;
+  holdBtn.textContent = hold.cd > 0 ? `Hold (${hold.cd})` : 'Hold';
     
     // Update Swap buttons
     const swap1Btn = document.getElementById('swap1-btn');
@@ -1529,18 +1529,20 @@
   
   // Drag & Drop Functions
   function startDrag(piece, startX, startY) {
-    if (!piece) return;
+    if (!piece || gameOver) return;
+    
+    // Validate piece exists in pool before starting drag
+    let pieceIndex = pool.findIndex(p => p === piece);
+    if (pieceIndex === -1) return;
     
     isDragging = true;
     draggedPiece = piece;
     dragStartPos = { x: startX, y: startY };
     dragOffset = { x: startX, y: startY };
     
-    // Remove piece from pool
-    if (selected.index >= 0) {
-      pool[selected.index] = null;
-      selected.index = -1;
-    }
+    // Remove piece from pool only after validation
+    pool[pieceIndex] = null;
+    selected.index = -1;
     
     render();
   }
@@ -1556,6 +1558,12 @@
       dropPreview = { piece: draggedPiece, r: boardPos.r, c: boardPos.c };
     } else {
       dropPreview = null;
+    }
+    
+    // Ensure drag state consistency
+    if (!draggedPiece || !isDragging) {
+      endDrag();
+      return;
     }
     
     render();
@@ -1660,6 +1668,10 @@
       let emptySlot = pool.findIndex(p => p === null);
       if (emptySlot !== -1) {
         pool[emptySlot] = draggedPiece;
+      } else {
+        // If no empty slot, try to find the original slot or add to end
+        console.warn("No empty slot found for returning dragged piece");
+        pool.push(draggedPiece);
       }
     }
     
@@ -2229,7 +2241,7 @@ function drawBombTexts() {
 
     // If clicking pool slot -> start drag
     let slot = poolSlotAt(x, y);
-    if (slot >= 0 && pool[slot] !== null) {
+    if (slot >= 0 && pool[slot] !== null && !gameOver) {
       if (isMobile) {
         // On mobile, start drag immediately
         startDrag(pool[slot], x, y);
@@ -2407,7 +2419,7 @@ function drawBombTexts() {
   window.addEventListener('keydown', (e)=>{
     if(e.key==='h' || e.key==='H'){
       // Hold selected piece - chỉ khi có khối được chọn và hold slot trống
-      if(selected.index>=0 && !hold.piece && hold.cd<=0){
+      if(selected.index>=0 && !hold.piece && hold.cd<=0 && !gameOver){
         hold.piece = pool[selected.index];
         pool[selected.index] = null;
         hold.cd = holdCfg.cdTurns;
@@ -2888,14 +2900,14 @@ function drawBombTexts() {
     // Mobile control buttons
     if (isMobile) {
       document.getElementById('hold-btn').addEventListener('click', function() {
-        if (selected.index >= 0 && !hold.piece && hold.cd <= 0) {
+        if (selected.index >= 0 && !hold.piece && hold.cd <= 0 && !gameOver) {
           hold.piece = pool[selected.index];
           pool[selected.index] = null;
           hold.cd = holdCfg.cdTurns;
           selected.index = -1;
           
           // Auto refill if pool is empty
-          if(pool.every(p => p === null)) {
+          if(pool.every(p === null)) {
             refillPool();
           } else {
             render();

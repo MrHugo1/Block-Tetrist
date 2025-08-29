@@ -1,6 +1,6 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.9.16  
+**Phiên bản:** v1.9.17  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.

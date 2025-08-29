@@ -1,5 +1,23 @@
 # Block Tetrist - Changelog
 
+## [v1.9.17] - 2024-12-19
+### 🎯 Mobile Layout & Touch Fixes
+- **Canvas Size Optimization**: Game board now occupies over 50% of mobile portrait screen
+- **Improved Centering**: Canvas is properly centered on mobile devices
+- **Touch Functionality Fixed**: Resolved touch input issues that prevented mobile gameplay
+- **Better Touch Event Handling**: Cleaner touch event system with proper tap vs long-press detection
+- **Responsive Canvas Calculation**: Dynamic canvas sizing based on viewport dimensions
+- **Mobile-First Layout**: Improved mobile portrait orientation handling
+
+### 🔧 Technical Improvements
+- **Touch Event Cleanup**: Removed conflicting touch event listeners
+- **Coordinate Calculation Fix**: Fixed touch coordinate calculations for scaled canvas
+- **Long-Press Gesture**: Improved 500ms long-press detection for piece deselection
+- **Canvas Scaling**: Better mobile scale factor calculation for optimal gameplay
+- **Event Prevention**: Proper touch event prevention for better mobile control
+
+---
+
 ## [v1.9.16] - 2024-12-19
 ### ✨ Mobile Support & Responsive Design
 - **Mobile Portrait Orientation**: Full support for mobile devices in portrait mode

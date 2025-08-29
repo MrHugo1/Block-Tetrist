@@ -306,10 +306,12 @@
     #wrap { 
       padding: 8px; 
       gap: 8px; 
+      justify-content: flex-start;
     }
     
     .header {
       margin-bottom: 10px;
+      order: 1;
     }
     
     .header h1 { 
@@ -322,13 +324,16 @@
       margin: 4px 0 0;
     }
     
-    /* Adjust canvas size for mobile portrait */
+    /* Make canvas much larger and centered for mobile portrait */
     canvas {
-      width: 100vw !important;
+      width: 90vw !important;
       height: auto !important;
-      max-width: 400px;
-      max-height: 500px;
+      max-width: none;
+      max-height: none;
       border-radius: 12px;
+      order: 2;
+      margin: 0 auto;
+      display: block;
     }
     
     /* Mobile-optimized stats display */
@@ -338,6 +343,7 @@
       gap: 8px;
       margin: 10px 0;
       justify-content: center;
+      order: 3;
     }
     
     .stat-item {
@@ -360,6 +366,7 @@
       min-width: 100%;
       padding: 12px 16px;
       margin: 8px 0;
+      order: 4;
     }
     
     /* Mobile-optimized controls info */
@@ -367,6 +374,7 @@
       grid-template-columns: 1fr;
       gap: 12px;
       margin-top: 16px;
+      order: 5;
     }
     
     .control-group {
@@ -386,6 +394,7 @@
       margin: 10px auto;
       max-width: 100%;
       padding: 12px;
+      order: 6;
     }
     
     .high-score-display h3 {
@@ -406,6 +415,7 @@
       margin: 10px auto;
       text-align: center;
       font-size: 10px;
+      order: 7;
     }
     
     .debug {
@@ -416,6 +426,7 @@
       max-width: 100%;
       font-size: 10px;
       padding: 6px 8px;
+      order: 8;
     }
     
     /* Mobile-optimized game over overlay */
@@ -764,7 +775,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.16</div>
+     <div class="version">v1.9.17</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -968,20 +979,30 @@
   
   // Initialize responsive canvas
   function initResponsiveCanvas() {
-    const viewport = window.visualViewport || window;
     const isPortrait = window.innerHeight > window.innerWidth;
     
     if (window.innerWidth <= 768 && isPortrait) {
       isMobile = true;
-      mobileScale = Math.min(window.innerWidth / 720, window.innerHeight / 900);
       
-      // Adjust canvas size for mobile
-      canvas.style.width = (720 * mobileScale) + 'px';
-      canvas.style.height = (900 * mobileScale) + 'px';
+      // Calculate optimal canvas size for mobile portrait
+      // Use 90% of viewport width and maintain aspect ratio
+      const targetWidth = window.innerWidth * 0.9;
+      const targetHeight = (targetWidth * 900) / 720; // Maintain 720:900 aspect ratio
+      
+      // Ensure it fits within viewport height (leaving space for header and controls)
+      const maxHeight = window.innerHeight * 0.7; // Use 70% of viewport height
+      const finalHeight = Math.min(targetHeight, maxHeight);
+      const finalWidth = (finalHeight * 720) / 900;
+      
+      mobileScale = finalWidth / 720;
+      
+      // Set canvas size
+      canvas.style.width = finalWidth + 'px';
+      canvas.style.height = finalHeight + 'px';
       
       // Adjust cell size and positions for mobile
       CELL = Math.floor(60 * mobileScale);
-      BOARD_X = (720 * mobileScale - CELL * BOARD_SIZE) / 2;
+      BOARD_X = (finalWidth - CELL * BOARD_SIZE) / 2;
       BOARD_Y = 40 * mobileScale;
       POOL_Y = 620 * mobileScale;
       
@@ -991,7 +1012,7 @@
         mobileControls.style.display = 'block';
       }
       
-      console.log(`Mobile mode: scale=${mobileScale}, cell=${CELL}, boardX=${BOARD_X}, boardY=${BOARD_Y}`);
+      console.log(`Mobile mode: scale=${mobileScale}, cell=${CELL}, boardX=${BOARD_X}, boardY=${BOARD_Y}, canvas=${finalWidth}x${finalHeight}`);
     } else {
       isMobile = false;
       mobileScale = 1;
@@ -2322,42 +2343,60 @@ function drawBombTexts() {
   canvas.addEventListener('contextmenu', e=>e.preventDefault());
   
   // Touch controls for mobile
-  canvas.addEventListener('touchstart', (e)=>{
-    e.preventDefault();
-    if(e.touches.length === 1) {
-      let rect = canvas.getBoundingClientRect();
-      let touch = e.touches[0];
-      let x = touch.clientX - rect.left;
-      let y = touch.clientY - rect.top;
-      
-      // Handle touch as left click
-      handleCanvasClick(x, y, 0);
-    }
-  }, { passive: false });
-  
-  // Long press for right click (deselect)
   let touchTimer = null;
-  canvas.addEventListener('touchstart', (e)=>{
+  let touchStartTime = 0;
+  
+  canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    touchTimer = setTimeout(() => {
-      selected.index = -1;
-      render();
-    }, 500); // 500ms for long press
+    
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      
+      touchStartTime = Date.now();
+      
+      // Start timer for long press
+      touchTimer = setTimeout(() => {
+        // Long press - deselect piece
+        selected.index = -1;
+        render();
+        touchTimer = null;
+      }, 500);
+    }
   }, { passive: false });
   
-  canvas.addEventListener('touchend', (e)=>{
-    if(touchTimer) {
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    
+    if (touchTimer) {
       clearTimeout(touchTimer);
+      
+      // Check if this was a short tap (not long press)
+      const touchEndTime = Date.now();
+      if (touchEndTime - touchStartTime < 500) {
+        // Short tap - handle as click
+        const touch = e.changedTouches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        // Handle touch as left click
+        handleCanvasClick(x, y, 0);
+      }
+      
       touchTimer = null;
     }
-  });
+  }, { passive: false });
   
-  canvas.addEventListener('touchmove', (e)=>{
-    if(touchTimer) {
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    
+    // Cancel long press if finger moves
+    if (touchTimer) {
       clearTimeout(touchTimer);
       touchTimer = null;
     }
-  });
+  }, { passive: false });
   
   // Mouse controls
   canvas.addEventListener('mousedown', (e)=>{

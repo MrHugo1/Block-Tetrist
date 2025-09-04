@@ -1,5 +1,26 @@
 # Block Tetrist - Changelog
 
+## [v1.9.18] - 2024-12-19
+### 🎯 Game Mode Restrictions & Multiplier Mode Enhancement
+- **Bomb-Only Pieces**: Restricted U7, L5T, L5, Cross, Cross_1, V3, R2x2R and their rotations to Blast Mode only
+- **Multiplier Mode Turn Limit**: Added 10 pool refill limit for Multiplier Mode - game ends after 10 pool refills regardless of game state
+- **Mode-Specific Piece Generation**: Non-blast modes now exclude bomb-exclusive pieces from pool generation
+- **Enhanced Debug Info**: Added pool refill counter display for Multiplier Mode
+- **Updated Mode Descriptions**: Clarified special features for each game mode
+
+### 🔧 Technical Improvements
+- **Piece Filtering System**: Implemented dynamic piece filtering based on current game mode
+- **Pool Refill Tracking**: Added poolRefillCount variable to track refills in Multiplier Mode
+- **Game End Logic**: Enhanced game over detection for Multiplier Mode turn limit
+- **Console Logging**: Added detailed logging for pool refill tracking
+
+### 📝 Documentation Updates
+- **Mode Selector**: Updated descriptions to reflect new restrictions and features
+- **Game Legend**: Added information about Multiplier Mode turn limit and Blast Mode exclusive pieces
+- **Version Update**: Bumped to v1.9.18
+
+---
+
 ## [v1.9.17] - 2024-12-19
 ### 🎯 Mobile Layout & Touch Fixes
 - **Canvas Size Optimization**: Game board now occupies over 50% of mobile portrait screen

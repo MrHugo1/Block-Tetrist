@@ -1,18 +1,18 @@
 # 🎮 Block Tetrist - Game Đặt Khối Thông Minh
 
-**Phiên bản:** v1.9.17  
+**Phiên bản:** v1.9.18  
 **Ngày cập nhật:** 19/12/2024
 
 Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến thuật đặt khối và hệ thống điểm phức tạp.
 
-## ✨ Tính Năng Mới Nhất (v1.8.0)
+## ✨ Tính Năng Mới Nhất (v1.9.18)
 
 ### 🎮 Hệ Thống Game Modes
 - **4 Chế Độ Chơi**: Basic, Blocker, Multiplier, Blast
 - **Basic Mode**: Chain multiplier cơ bản
 - **Blocker Mode**: Durable pieces + Precision bonus
-- **Multiplier Mode**: Bonus points system
-- **Blast Mode**: Bomb explosion system
+- **Multiplier Mode**: Bonus points system - Kết thúc sau 10 lần tạo pool
+- **Blast Mode**: Bomb explosion system + Khối đặc biệt độc quyền
 - **High Score Riêng Biệt**: Mỗi mode có điểm cao nhất riêng
 
 ### 💣 Hệ Thống Bomb (Blast Mode)
@@ -21,18 +21,22 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - **Kích Hoạt Bonus**: Bomb có thể kích hoạt ô bonus trong vùng nổ
 - **Tính Điểm Nổ**: Mỗi ô bị nổ cho điểm tương ứng
 - **Lifetime Management**: Bomb tự biến mất sau 1-2 lượt nếu không nổ
+- **Khối Đặc Biệt**: Chỉ Blast Mode có các khối U7, L5T, L5, Cross, Cross_1, V3, R2x2R
 
 ### 🎁 Hệ Thống Bonus Points
 - **Ô Bonus x2-x7**: Xuất hiện sau khi clear line (30% chance)
 - **Nhân Điểm Thông Minh**: Clear line chứa ô bonus → nhân điểm tương ứng
 - **Nhân Dồn**: Nhiều ô bonus cùng lúc → nhân dồn (x2 × x5 = x10)
 - **Tự Động Biến Mất**: Ô bonus tồn tại 2-4 lượt tùy theo hệ số nhân
+- **Giới Hạn Thời Gian**: Multiplier Mode kết thúc sau 10 lần tạo pool mới
 
 ### 🔧 Sửa Lỗi Quan Trọng
 - **Sửa Logic Spawn**: Bonus pieces giờ spawn trên pieces có sẵn, không phải ô trống
 - **Sửa Thứ Tự Xử Lý**: Spawn bonus mới trước khi xóa bonus cũ
 - **Sửa Logic Clear Line**: Bonus pieces được tính đúng trong việc clear line
 - **Thêm Debug Logging**: Console.log chi tiết để track hoạt động của bonus system
+- **Giới Hạn Khối Theo Mode**: Các khối đặc biệt chỉ xuất hiện ở Blast Mode
+- **Giới Hạn Thời Gian Multiplier**: Multiplier Mode có giới hạn 10 lần tạo pool
 
 ## 🎯 Tính Năng Chính
 
@@ -41,6 +45,7 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - **Pool 3 Khối**: Chọn khối từ 3 khối có sẵn
 - **Hold System**: Lưu 1 khối (CD 3 lượt)
 - **Swap System**: Đổi khối cứu nạn (CD 9 lượt)
+- **Mode-Specific Pieces**: Một số khối chỉ xuất hiện ở Blast Mode
 
 ### 🏆 Hệ Thống Điểm
 - **Chain Multiplier**: Clear liên tiếp tăng multiplier (≤1.5×)
@@ -76,6 +81,8 @@ Một game puzzle thông minh với bàn chơi 8×8, kết hợp giữa chiến 
 - Clear các ô có độ bền (màu đỏ) để tăng điểm
 - Tận dụng ô bonus để nhân điểm
 - **Chiến thuật sử dụng bomb**: Kích hoạt bomb đúng thời điểm để tối đa hóa điểm
+- **Multiplier Mode**: Quản lý thời gian với giới hạn 10 lần tạo pool
+- **Blast Mode**: Sử dụng các khối đặc biệt để tối đa hóa điểm
 
 ## 🔧 Cài Đặt & Chạy
 
@@ -135,6 +142,13 @@ Nếu gặp vấn đề, vui lòng:
 4. Tạo Pull Request
 
 ## 📜 Lịch Sử Phiên Bản
+
+### v1.9.18 (19/12/2024)
+- 🎯 Giới hạn các khối đặc biệt (U7, L5T, L5, Cross, Cross_1, V3, R2x2R) chỉ xuất hiện ở Blast Mode
+- ⏰ Thêm giới hạn 10 lần tạo pool cho Multiplier Mode
+- 🔧 Cải thiện hệ thống lọc khối theo game mode
+- 📊 Thêm debug info cho pool refill counter
+- 📝 Cập nhật mô tả game mode và documentation
 
 ### v1.8.4 (19/12/2024)
 - 🐛 Sửa lỗi duplicate piece names gây overwrite

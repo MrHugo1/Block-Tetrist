@@ -775,7 +775,7 @@
 </head>
 <body>
 <div id="wrap">
-     <div class="version">v1.9.17</div>
+     <div class="version">v1.9.18</div>
   <div class="debug" id="debug"></div>
   
   <!-- High Score Display -->
@@ -820,19 +820,19 @@
         <button class="mode-button" data-mode="blocker">
           <div class="mode-icon">🛡️</div>
           <div class="mode-title">Blocker Mode</div>
-          <div class="mode-desc">Durable pieces + Precision bonus</div>
+          <div class="mode-desc">2-cell & 4-cell blocker patterns + Precision bonus</div>
           <div class="mode-highscore">High Score: <span id="blocker-highscore">0</span></div>
         </button>
         <button class="mode-button" data-mode="multiplier">
           <div class="mode-icon">⭐</div>
           <div class="mode-title">Multiplier Mode</div>
-          <div class="mode-desc">Bonus points system</div>
+          <div class="mode-desc">100% bonus spawn + extended duration - 10 pool refills limit</div>
           <div class="mode-highscore">High Score: <span id="multiplier-highscore">0</span></div>
         </button>
         <button class="mode-button" data-mode="blast">
           <div class="mode-icon">💣</div>
           <div class="mode-title">Blast Mode</div>
-          <div class="mode-desc">Bomb explosion system</div>
+          <div class="mode-desc">3 bombs + 4x4 explosion + exclusive pieces</div>
           <div class="mode-highscore">High Score: <span id="blast-highscore">0</span></div>
         </button>
       </div>
@@ -883,8 +883,10 @@
       <p><b>Chọn khối</b> từ pool bên dưới, sau đó <b>click lên ô</b> trên bàn để đặt. <span class="hl">Chuột phải</span> để bỏ chọn.</p>
       <p><span class="hl">Hold (H)</span>: Lưu 1 khối (CD 3 lượt)</p>
       <p><span class="hl">Swap (1/2/3)</span>: Đổi khối sang khối cứu nạn (CD 9 lượt)</p>
-             <p><span class="hl">Ô đỏ có số</span>: Piece có độ bền, cần xóa đủ số lần để biến mất</p>
+             <p><span class="hl">Ô đỏ có số</span>: Blocker patterns (2-cell: viền xanh, 4-cell: viền cam) - cần xóa đủ số lần để biến mất</p>
              <p><span class="hl">Ô bonus x2-x7</span>: Nhân điểm khi clear line chứa ô bonus</p>
+             <p><span class="hl">Multiplier Mode</span>: 100% bonus spawn + thời gian tồn tại gấp đôi - Kết thúc sau 10 lần tạo pool</p>
+             <p><span class="hl">Blast Mode</span>: 3 bombs + nổ 4x4 + khối đặc biệt (U7, L5, Cross, V3, R2x2R)</p>
     </div>
     
     <div class="card legend">
@@ -1091,6 +1093,7 @@
   let bombPieces = []; // Bomb pieces that explode when lines are cleared
   let bombTexts = []; // Bomb explosion score texts
   let bombSpawned = false; // Track if bomb has been spawned this game
+  let poolRefillCount = 0; // Track number of pool refills for Multiplier Mode
 
   // 65 pieces with rotations (v1.9.15) - Refactored to use string-based piece definitions with decodePiece function
   // Format: 'x' = filled cell (1), 'o' = empty cell (0)
@@ -1458,7 +1461,7 @@
       "ox"
     ), 
 
-    "L5t_270": decodePiece(
+    "L5T_270": decodePiece(
       "ooxo",
       "xxxx"
   ),
@@ -1611,6 +1614,7 @@
     updateHighScoreDisplay();
     
     console.log(`Game mode selected: ${mode}`);
+    console.log(`Current game mode is now: ${currentGameMode}`);
   }
   
   function updateHighScoreDisplay() {
@@ -1758,6 +1762,7 @@
     bombPieces = [];
     bombTexts = [];
     bombSpawned = false;
+    poolRefillCount = 0;
     
     // Generate features based on game mode
     if (currentGameMode === 'blocker') {
@@ -1848,32 +1853,154 @@
   }
   
   function generateDurablePieces() {
-    let count = Math.floor(Math.random() * 7) + 6; // 6-12 pieces
     durablePieces = [];
-    for(let i = 0; i < count; i++) {
-      let r, c;
-      do {
-        r = Math.floor(Math.random() * BOARD_SIZE);
-        c = Math.floor(Math.random() * BOARD_SIZE);
-      } while(isDurablePiece(r, c) || (r === 0 && c === 0)); // Avoid top-left corner
+    
+    // Generate 4-6 blocker patterns (2-cell or 4-cell)
+    let patternCount = Math.floor(Math.random() * 3) + 4; // 4-6 patterns
+    
+    for(let i = 0; i < patternCount; i++) {
+      let patternType = Math.random() < 0.6 ? '2cell' : '4cell'; // 60% chance for 2-cell, 40% for 4-cell
       
-      // Random durability 2-5
-      let durability = Math.floor(Math.random() * 4) + 2;
+      if (patternType === '2cell') {
+        generate2CellBlocker();
+      } else {
+        generate4CellBlocker();
+      }
+    }
+  }
+  
+  function generate2CellBlocker() {
+    // Try to place 2-cell blocker (horizontal or vertical line)
+    let attempts = 0;
+    let maxAttempts = 20;
+    
+    while (attempts < maxAttempts) {
+      let r = Math.floor(Math.random() * BOARD_SIZE);
+      let c = Math.floor(Math.random() * BOARD_SIZE);
+      let direction = Math.random() < 0.5 ? 'horizontal' : 'vertical';
+      
+      let positions = [];
+      if (direction === 'horizontal' && c < BOARD_SIZE - 1) {
+        // Horizontal 2-cell
+        positions = [
+          {r: r, c: c},
+          {r: r, c: c + 1}
+        ];
+      } else if (direction === 'vertical' && r < BOARD_SIZE - 1) {
+        // Vertical 2-cell
+        positions = [
+          {r: r, c: c},
+          {r: r + 1, c: c}
+        ];
+      } else {
+        attempts++;
+        continue;
+      }
+      
+      // Check if positions are available
+      let canPlace = true;
+      for(let pos of positions) {
+        if (isDurablePiece(pos.r, pos.c) || (pos.r === 0 && pos.c === 0)) {
+          canPlace = false;
+          break;
+        }
+      }
+      
+      if (canPlace) {
+        // Place the 2-cell blocker
+        let durability = Math.floor(Math.random() * 3) + 2; // 2-4 durability
+        for(let pos of positions) {
       durablePieces.push({
-        r: r, 
-        c: c, 
+            r: pos.r,
+            c: pos.c,
         durability: durability,
-        color: "#ff6b6b"
-      });
+            color: "#ff6b6b",
+            pattern: '2cell',
+            direction: direction
+          });
+        }
+        console.log(`Generated 2-cell blocker at (${r},${c}) - ${direction}`);
+        return;
+      }
+      
+      attempts++;
+    }
+  }
+  
+  function generate4CellBlocker() {
+    // Try to place 4-cell blocker (square or line)
+    let attempts = 0;
+    let maxAttempts = 20;
+    
+    while (attempts < maxAttempts) {
+      let r = Math.floor(Math.random() * BOARD_SIZE);
+      let c = Math.floor(Math.random() * BOARD_SIZE);
+      let pattern = Math.random() < 0.5 ? 'square' : 'line'; // 50% square, 50% line
+      
+      let positions = [];
+      if (pattern === 'square' && r < BOARD_SIZE - 1 && c < BOARD_SIZE - 1) {
+        // 2x2 square
+        positions = [
+          {r: r, c: c},
+          {r: r, c: c + 1},
+          {r: r + 1, c: c},
+          {r: r + 1, c: c + 1}
+        ];
+      } else if (pattern === 'line' && Math.random() < 0.5 && c < BOARD_SIZE - 3) {
+        // Horizontal 4-cell line
+        positions = [
+          {r: r, c: c},
+          {r: r, c: c + 1},
+          {r: r, c: c + 2},
+          {r: r, c: c + 3}
+        ];
+      } else if (pattern === 'line' && r < BOARD_SIZE - 3) {
+        // Vertical 4-cell line
+        positions = [
+          {r: r, c: c},
+          {r: r + 1, c: c},
+          {r: r + 2, c: c},
+          {r: r + 3, c: c}
+        ];
+      } else {
+        attempts++;
+        continue;
+      }
+      
+      // Check if positions are available
+      let canPlace = true;
+      for(let pos of positions) {
+        if (isDurablePiece(pos.r, pos.c) || (pos.r === 0 && pos.c === 0)) {
+          canPlace = false;
+          break;
+        }
+      }
+      
+      if (canPlace) {
+        // Place the 4-cell blocker
+        let durability = Math.floor(Math.random() * 3) + 3; // 3-5 durability (higher than 2-cell)
+        for(let pos of positions) {
+          durablePieces.push({
+            r: pos.r,
+            c: pos.c,
+            durability: durability,
+            color: "#ff6b6b",
+            pattern: '4cell',
+            type: pattern
+          });
+        }
+        console.log(`Generated 4-cell blocker at (${r},${c}) - ${pattern}`);
+      return;
+    }
+      
+      attempts++;
     }
   }
   
   function generateBonusPieces() {
-    // 30% chance to spawn bonus pieces after line clear
-    if (Math.random() > 0.3) {
-      console.log("Bonus spawn failed: 30% chance not met");
-      return;
-    }
+    // 100% chance to spawn bonus pieces after line clear for Multiplier Mode
+    // No random check needed for 100% spawn rate
+    console.log("generateBonusPieces called - current bonus pieces:", bonusPieces.length);
     
     // Don't spawn if already at max (4 pieces)
     if (bonusPieces.length >= 4) {
@@ -1899,8 +2026,8 @@
     
     console.log(`Bonus spawn: Found ${availablePositions.length} available positions on existing pieces`);
     
-    // Spawn 2-3 bonus pieces
-    let spawnCount = Math.floor(Math.random() * 2) + 2; // 2-3 pieces
+    // Spawn 3-4 bonus pieces (increased from 2-3)
+    let spawnCount = Math.floor(Math.random() * 2) + 3; // 3-4 pieces
     spawnCount = Math.min(spawnCount, 4 - bonusPieces.length, availablePositions.length);
     
     console.log(`Bonus spawn: Attempting to spawn ${spawnCount} pieces`);
@@ -1913,11 +2040,11 @@
       let multipliers = [2, 3, 4, 5, 6, 7];
       let multiplier = multipliers[Math.floor(Math.random() * multipliers.length)];
       
-      // Determine lifetime based on multiplier
+      // Determine lifetime based on multiplier (increased for 100% duration)
       let lifetime;
-      if(multiplier <= 3) lifetime = 4;      // x2, x3: 4 turns
-      else if(multiplier <= 5) lifetime = 3; // x4, x5: 3 turns
-      else lifetime = 2;                      // x6, x7: 2 turns
+      if(multiplier <= 3) lifetime = 8;      // x2, x3: 8 turns (doubled from 4)
+      else if(multiplier <= 5) lifetime = 6; // x4, x5: 6 turns (doubled from 3)
+      else lifetime = 4;                      // x6, x7: 4 turns (doubled from 2)
       
       bonusPieces.push({
         r: pos.r,
@@ -2173,9 +2300,12 @@ function drawBombTexts() {
     // Generate new bonus pieces after line clear (BEFORE removing cleared ones) - Only for Multiplier Mode
     if((clearedRows.length > 0 || clearedCols.length > 0) && currentGameMode === 'multiplier') {
       console.log(`Line clear detected: ${clearedRows.length} rows, ${clearedCols.length} cols`);
+      console.log(`Current game mode: ${currentGameMode}`);
       console.log(`Bonus pieces before spawn: ${bonusPieces.length}`);
       generateBonusPieces();
       console.log(`Bonus pieces after spawn: ${bonusPieces.length}`);
+    } else {
+      console.log(`No bonus spawn - clearedRows: ${clearedRows.length}, clearedCols: ${clearedCols.length}, mode: ${currentGameMode}`);
     }
     
          // Remove cleared bonus pieces from the bonusPieces array (AFTER spawning new ones)
@@ -2234,6 +2364,25 @@ function drawBombTexts() {
   function refillPool(){
     let FR = getFillRate();
     let weights = normalize(BASE_WEIGHTS);
+    
+    // Filter out bomb-only pieces for non-blast modes
+    if (currentGameMode !== 'blast') {
+      const bombOnlyPieces = [
+        'U7', 'U7_90', 'U7_180', 'U7_270',
+        'L5T', 'L5T_90', 'L5T_180', 'L5t_270',
+        'L5', 'L5_90', 'L5_180', 'L5_270',
+        'L5R', 'L5_90', 'L5_180', 'L5_270',
+        'Cross', 'Cross_1',
+        'V3', 'V3_90', 'V3_180', 'V3_270',
+        'R2x2R', 'R2x2R_90', 'R2x2R_180', 'R2x2R_270'
+      ];
+      
+      // Remove bomb-only pieces from weights
+      bombOnlyPieces.forEach(piece => {
+        delete weights[piece];
+      });
+    }
+    
     let factor = getBiasFactor(FR);
     weights = applyBias(weights, swapCfg.rescueSet, factor);
     
@@ -2294,6 +2443,20 @@ function drawBombTexts() {
     comboLevel = 0; // reset combo at refill start
     comboStreak = 0; // reset combo streak at refill start
     
+    // Increment pool refill count for Multiplier Mode
+    if (currentGameMode === 'multiplier') {
+      poolRefillCount++;
+      console.log(`Multiplier Mode: Pool refill count ${poolRefillCount}/10`);
+      
+      // Check if reached 10 pool refills - end game
+      if (poolRefillCount >= 10) {
+        console.log('Multiplier Mode: Reached 10 pool refills - ending game');
+        gameOver = true;
+        render();
+        return;
+      }
+    }
+    
     // Try to generate bomb piece if conditions are met - Only for Blast Mode
     // Generate new bomb during pool refill (allowing multiple bombs per game)
     if (currentGameMode === 'blast') {
@@ -2301,7 +2464,13 @@ function drawBombTexts() {
     }
     
          // Debug info
-              debug(`Mode: ${currentGameMode.toUpperCase()}<br/>Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces<br/>Bomb: ${bombPieces.length} pieces<br/>Total Pieces: 65`);
+              let blockerInfo = '';
+              if (currentGameMode === 'blocker') {
+                let twoCellCount = durablePieces.filter(p => p.pattern === '2cell').length / 2;
+                let fourCellCount = durablePieces.filter(p => p.pattern === '4cell').length / 4;
+                blockerInfo = `<br/>Blocker: ${twoCellCount} x2-cell, ${fourCellCount} x4-cell patterns`;
+              }
+              debug(`Mode: ${currentGameMode.toUpperCase()}<br/>Pool: ${pool.filter(p => p !== null).length}/3 items<br/>Hold: ${hold.piece?'Yes':'No'} (CD:${hold.cd})<br/>Swap: CD ${swapCD}<br/>Pool state: [${pool.map(p => p ? p.id : 'null').join(', ')}]<br/>Pool array length: ${pool.length}<br/>Bonus: ${bonusPieces.length}/4 pieces (100% spawn)<br/>Bomb: ${bombPieces.length}/3 pieces (4x4 explosion)${blockerInfo}<br/>${currentGameMode === 'multiplier' ? `Pool Refills: ${poolRefillCount}/10<br/>` : ''}Total Pieces: 65`);
     
     render();
   }
@@ -2589,7 +2758,7 @@ function drawBombTexts() {
         let x = BOARD_X + c*CELL, y = BOARD_Y + r*CELL;
         
         if(isDurablePiece(r, c)) {
-          // Draw durable piece with durability number
+          // Draw durable piece with durability number and pattern indicator
           let piece = getDurablePiece(r, c);
           let durability = piece.durability;
           
@@ -2597,8 +2766,18 @@ function drawBombTexts() {
           let intensity = Math.max(0.3, durability / 5);
           ctx.fillStyle = `rgba(247, 118, 142, ${intensity})`;
           ctx.fillRect(x+2,y+2,CELL-4,CELL-4);
-          ctx.strokeStyle = "#d73a49";
+          
+          // Different border colors for different patterns
+          if (piece.pattern === '2cell') {
+            ctx.strokeStyle = "#4caf50"; // Green border for 2-cell
+            ctx.lineWidth = 3;
+          } else if (piece.pattern === '4cell') {
+            ctx.strokeStyle = "#ff9800"; // Orange border for 4-cell
+            ctx.lineWidth = 3;
+          } else {
+            ctx.strokeStyle = "#d73a49"; // Red border for old single pieces
           ctx.lineWidth = 2;
+          }
           ctx.strokeRect(x+2, y+2, CELL-4, CELL-4);
           
           // Draw durability number
@@ -2606,6 +2785,16 @@ function drawBombTexts() {
           ctx.font = "bold 16px system-ui";
           ctx.textAlign = "center";
           ctx.fillText(durability.toString(), x + CELL/2, y + CELL/2 + 5);
+          
+          // Draw pattern indicator
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 10px system-ui";
+          ctx.textAlign = "center";
+          if (piece.pattern === '2cell') {
+            ctx.fillText("2", x + CELL/2, y + CELL/2 + 20);
+          } else if (piece.pattern === '4cell') {
+            ctx.fillText("4", x + CELL/2, y + CELL/2 + 20);
+          }
                  } else if(currentGameMode === 'blast' && isBombPiece(r, c)) {
            // Draw bomb piece with distinct black color and red border - Only for Blast Mode
            let piece = getBombPiece(r, c);
@@ -2829,16 +3018,16 @@ function drawBombTexts() {
   }
 
   function generateBombPiece() {
-     // Only spawn if Fill Rate >= 50%
+     // Only spawn if Fill Rate >= 30% (lowered from 50%)
    let FR = getFillRate();
-   if (FR < 0.5) {
-     console.log(`Bomb spawn failed: FR=${FR.toFixed(2)} (need >=0.5)`);
+   if (FR < 0.3) {
+     console.log(`Bomb spawn failed: FR=${FR.toFixed(2)} (need >=0.3)`);
      return;
    }
 
-   // Don't spawn if already at max (1 bomb at a time)
-   if (bombPieces.length >= 1) {
-     console.log("Bomb spawn failed: Already at max (1 bomb at a time)");
+   // Don't spawn if already at max (3 bombs at a time - increased from 2)
+   if (bombPieces.length >= 3) {
+     console.log("Bomb spawn failed: Already at max (3 bombs at a time)");
      return;
    }
 
@@ -2862,8 +3051,8 @@ function drawBombTexts() {
   let posIndex = Math.floor(Math.random() * availablePositions.length);
   let pos = availablePositions[posIndex];
   
-  // Random lifetime 1-2 turns
-  let lifetime = Math.floor(Math.random() * 2) + 1;
+  // Random lifetime 3-5 turns (increased for 100% duration)
+  let lifetime = Math.floor(Math.random() * 3) + 3;
 
   bombPieces.push({
     r: pos.r,
@@ -2895,9 +3084,9 @@ function drawBombTexts() {
   let explosionScore = 0;
   let bonusPiecesActivated = [];
 
-  // Clear all pieces in the 3x3 area around the bomb
-  for(let r = bombR - 1; r <= bombR + 1; r++) {
-    for(let c = bombC - 1; c <= bombC + 1; c++) {
+  // Clear all pieces in the 4x4 area around the bomb (increased from 3x3)
+  for(let r = bombR - 2; r <= bombR + 1; r++) {
+    for(let c = bombC - 2; c <= bombC + 1; c++) {
       if(r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
         if(grid[r][c] || isDurablePiece(r, c) || isBonusPiece(r, c)) {
           // If it's a durable piece, reduce its durability
